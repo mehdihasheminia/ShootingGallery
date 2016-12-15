@@ -24,7 +24,7 @@ public class DebugRenderer2D implements iDispose {
     //Box2D units are different from LibGdx rendering units
     //
     private int MetertoPixels(float meters) {
-        int ppm = Engine.getInstance().getCurrentLevel().getMap().params.ppm;
+        int ppm = Engine.getInstance().getConfig().ppm;
         return (int) (meters * ppm);
     }
 }

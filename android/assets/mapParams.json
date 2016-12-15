@@ -1,5 +1,4 @@
 {
-ppm: 32,
 "collisionLayerName": "bornaapp_collision",
 "portalLayerName": "bornaapp_portals",
 "lightsLayerName": "bornaapp_lights",

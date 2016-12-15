@@ -17,9 +17,6 @@ public class EntryMenu extends LevelBase {
         loadProgressively = false;
     }
 
-//    private BitmapFont titleFont;
-//    private BitmapFont guideFont;
-
     @Override
     public void onCreate() {
 

@@ -11,6 +11,7 @@ import com.badlogic.gdx.physics.box2d.FixtureDef;
 import com.badlogic.gdx.physics.box2d.PolygonShape;
 import com.badlogic.gdx.physics.box2d.Shape;
 import com.bornaapp.borna2d.game.levels.Engine;
+import com.bornaapp.borna2d.log;
 import com.bornaapp.borna2d.physics.CollisionEvent;
 
 /**
@@ -241,12 +242,12 @@ public class BodyComponent extends Component {
     //Box2D units are different from LibGdx rendering units
     //
     private float PixeltoMeters(float distanceInPixels) {
-        int ppm = Engine.getInstance().getCurrentLevel().getMap().params.ppm;
+        int ppm = Engine.getInstance().getConfig().ppm;
         return distanceInPixels / ppm;
     }
 
     private float MetertoPixels(float distanceInMeters) {
-        int ppm = Engine.getInstance().getCurrentLevel().getMap().params.ppm;
+        int ppm = Engine.getInstance().getConfig().ppm;
         return distanceInMeters * ppm;
     }
     //endregion

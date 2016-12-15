@@ -8,7 +8,6 @@ import com.badlogic.gdx.math.Vector2;
  */
 
 public class MapParameters {
-    public int     ppm;                  //the factor which determines how many pixels(rendering Gdx unit) represents one meters(Box2D physics unit)
     public String  collisionLayerName;   //each object: property x & y & width & height(Float)
     public String  portalLayerName;      //each object: property x & y & width & height(Float)
     public String  lightsLayerName;      //each object: property x & y(Float), custom property"distance"(String) & "color"(String[4])

@@ -21,6 +21,7 @@ public class Make_EngineConfigFile {
         EngineConfig engineConfig = new EngineConfig();
         engineConfig.logLevel = 0;
         engineConfig.gravity = new Vector2();
+        engineConfig.ppm = 32;
         // makes config file & writes data to it.
         // it's user's responsibility to copy this file to asset folder.
         Json json = new Json();

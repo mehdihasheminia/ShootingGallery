@@ -1,7 +1,8 @@
 {
 "textures": [
 	"textures/coin.atlas",
-	"textures/heart.atlas"
+	"textures/heart.atlas",
+	"textures/rifle.atlas"
 ],
 "images": [
 	"images/coinBox.png",

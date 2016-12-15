@@ -387,7 +387,7 @@ public abstract class LevelBase implements GestureListener {
 
         //render Box2D lights
         if (enableLights) {
-            rayHandler.setCombinedMatrix(camera.combined.cpy().scale(Engine.getInstance().getCurrentLevel().getMap().params.ppm, Engine.getInstance().getCurrentLevel().getMap().params.ppm, 1f));
+            rayHandler.setCombinedMatrix(camera.combined.cpy().scale(Engine.getInstance().getConfig().ppm, Engine.getInstance().getConfig().ppm, 1f));
             rayHandler.updateAndRender();
         }
 

@@ -9,12 +9,17 @@ import com.badlogic.gdx.math.Vector2;
 public class EngineConfig {
 
     /**
-     * 0. mutes all logging.
-     * 1. logs only error messages.
-     * 2. logs error & info messages(non debug messages).
-     * 3. logs all messages.
+     * 0. mutes all logging.<p>
+     * 1. logs only error messages.<p>
+     * 2. logs error & info messages(non debug messages).<p>
+     * 3. logs all messages.<p>
      */
     public int logLevel;
+
+    /**
+     * the factor which determines how many pixels(rendering Gdx unit) represents one meters(Box2D physics unit)
+     */
+    public int     ppm;
 
     public Vector2 gravity = new Vector2();
 }

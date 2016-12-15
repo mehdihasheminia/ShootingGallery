@@ -30,12 +30,12 @@ public class PointLightComponent extends Component {
     //Box2D units are different from LibGdx rendering units
     //
     private float PixeltoMeters(float distanceInPixels){
-        int ppm = Engine.getInstance().getCurrentLevel().getMap().params.ppm;
+        int ppm = Engine.getInstance().getConfig().ppm;
         return distanceInPixels/ppm;
     }
 
     private float MetertoPixels(float distanceInMeters){
-        int ppm = Engine.getInstance().getCurrentLevel().getMap().params.ppm;
+        int ppm = Engine.getInstance().getConfig().ppm;
         return distanceInMeters*ppm;
     }
     //endregion
