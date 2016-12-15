@@ -1,0 +1,18 @@
+{
+
+"textures": [
+    "textures/settingsBtn.atlas",
+    "textures/volumeBtn.atlas",
+    "textures/resumeBtn.atlas",
+    "textures/restartBtn.atlas",
+    "textures/exitBtn.atlas",
+    "textures/ContinueBtn.atlas"
+],
+
+"images": [
+    "images/pauseTable.png",
+    "images/gameoverTable.png",
+    "images/levelCompleteTable.png"
+]
+
+}

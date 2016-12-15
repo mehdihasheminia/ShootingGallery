@@ -1,0 +1,19 @@
+HomeBtn.png
+size: 200, 99
+format: RGBA8888
+filter: Linear,Linear
+repeat: none
+01HomeNormal
+  rotate: false
+  xy: 0, 0
+  size: 100, 99
+  orig: 100, 99
+  offset: 0, 0
+  index: -1
+02HomeClicked
+  rotate: false
+  xy: 100, 0
+  size: 100, 99
+  orig: 100, 99
+  offset: 0, 0
+  index: -1

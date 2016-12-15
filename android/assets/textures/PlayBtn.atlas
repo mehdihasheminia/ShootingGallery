@@ -1,0 +1,19 @@
+playBtn.png
+size: 200, 101
+format: RGBA8888
+filter: Linear,Linear
+repeat: none
+01playNormal
+  rotate: false
+  xy: 0, 0
+  size: 100, 101
+  orig: 100, 101
+  offset: 0, 0
+  index: -1
+02playClicked
+  rotate: false
+  xy: 100, 0
+  size: 100, 101
+  orig: 100, 101
+  offset: 0, 0
+  index: -1

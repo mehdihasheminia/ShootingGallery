@@ -1,0 +1,23 @@
+{
+"textures": [
+	"textures/coin.atlas",
+	"textures/heart.atlas"
+],
+"images": [
+	"images/coinBox.png",
+	"images/LifeBox.png",
+	"images/LifeBar.png"
+],
+"levels": [
+	"levels/M1.tmx"
+],
+"particles": [
+],
+"sounds": [
+        "sounds/coin1.wav",
+	"sounds/level-up-01.wav"
+],
+"fonts": [
+]
+}
+

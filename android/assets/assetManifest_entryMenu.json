@@ -1,0 +1,13 @@
+{
+
+"textures": [
+    "textures/PlayBtn.atlas",
+    "textures/settingsBtn.atlas",
+    "textures/shareBtn.atlas"
+],
+
+"images": [
+    "images/EntryMenu-bg.png"
+]
+
+}

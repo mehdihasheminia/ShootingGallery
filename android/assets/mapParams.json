@@ -1,0 +1,11 @@
+{
+ppm: 32,
+"collisionLayerName": "bornaapp_collision",
+"portalLayerName": "bornaapp_portals",
+"lightsLayerName": "bornaapp_lights",
+"particlesLayerName": "bornaapp_particles",
+"checkpointsLayerName": "bornaapp_checkpoints",
+"pathLayerName": "bornaapp_path",
+"propertyKey_Color": "color",
+"propertyKey_Distance": "distance"
+}

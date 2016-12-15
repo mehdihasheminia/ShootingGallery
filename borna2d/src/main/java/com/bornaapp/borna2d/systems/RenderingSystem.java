@@ -1,0 +1,186 @@
+package com.bornaapp.borna2d.systems;
+
+import com.badlogic.ashley.core.ComponentMapper;
+import com.badlogic.ashley.core.Entity;
+import com.badlogic.ashley.core.Family;
+import com.badlogic.ashley.systems.IteratingSystem;
+import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.badlogic.gdx.graphics.g2d.TextureRegion;
+import com.badlogic.gdx.utils.Array;
+import com.bornaapp.borna2d.components.AnimationComponent;
+import com.bornaapp.borna2d.components.ParticleComponent;
+import com.bornaapp.borna2d.components.TextureComponent;
+import com.bornaapp.borna2d.game.levels.Engine;
+import com.bornaapp.borna2d.components.TextureAtlasComponent;
+import com.bornaapp.borna2d.game.levels.LevelBase;
+
+import java.util.Comparator;
+
+/**
+ *
+ */
+public class RenderingSystem extends IteratingSystem {
+
+    Sync sync;
+    private Array<Entity> renderQueue;
+
+    private ComponentMapper<ParticleComponent> particleMap;
+    private ComponentMapper<TextureComponent> texMap;
+    private ComponentMapper<TextureAtlasComponent> texAtlasMap;
+    private ComponentMapper<AnimationComponent> animMap;
+
+    //region constructor
+    public RenderingSystem(LevelBase level) {
+        super(Family.all().get(), level.getSystemPriority());
+        renderQueue = new Array<Entity>();
+        sync = new Sync();
+        particleMap = ComponentMapper.getFor(ParticleComponent.class);
+        texMap = ComponentMapper.getFor(TextureComponent.class);
+        texAtlasMap = ComponentMapper.getFor(TextureAtlasComponent.class);
+        animMap = ComponentMapper.getFor(AnimationComponent.class);
+    }
+    //endregion
+
+    //region override methods
+    @Override
+    public void update(float deltaTime) {
+        super.update(deltaTime);
+        renderQueue.sort(comparator);
+
+        SpriteBatch batch = Engine.getInstance().getCurrentLevel().getBatch();
+        if (batch.isDrawing())
+            batch.end();
+        batch.begin();
+
+        for (Entity entity : renderQueue) {
+            //
+            renderTexture(entity);
+            //
+            renderTextureAtlas(entity, deltaTime);
+            //
+            renderParticle(entity, deltaTime);
+        }
+        batch.end();
+
+        renderQueue.clear();
+    }
+
+    @Override
+    public void processEntity(Entity entity, float deltaTime) {
+        renderQueue.add(entity);
+    }
+    //endregion
+
+    //region Render & Update methods
+    private void renderParticle(Entity entity, float deltaTime) {
+        if (!particleMap.has(entity))
+            return;
+        ParticleComponent partComp = particleMap.get(entity);
+        partComp.particleEffect.update(deltaTime);
+        partComp.particleEffect.draw(Engine.getInstance().getCurrentLevel().getBatch());
+        if (partComp.particleEffect.isComplete() && partComp.looped)
+            partComp.particleEffect.reset();
+    }
+
+    private void renderTexture(Entity entity) {
+        if (!texMap.has(entity))
+            return;
+        TextureComponent texComp = texMap.get(entity);
+
+        // model origin( (0,0) in model-space ) is bot-left corner by
+        // default and rotation and scaling is relative to this point.
+        // We change the to the center of texture.
+        float w, h, originX, originY, scaleX, scaleY, rot;
+        w = texComp.texture.getWidth();
+        h = texComp.texture.getHeight();
+        originX = w / 2;
+        originY = h / 2;
+        scaleX = texComp.scale;
+        scaleY = texComp.scale;
+        rot = sync.getRotation(entity);
+
+        //the portion of texture in texel
+        int texOffsetX, texOffsetY, texW, texH;
+        texOffsetX = 0;
+        texOffsetY = 0;
+        texW = texComp.texture.getWidth();
+        texH = texComp.texture.getHeight();
+
+        // World transformations
+        // taking the new Origin into account
+        float x, y;
+        x = sync.getX(entity) - originX;
+        y = sync.getY(entity) - originY;
+        if (x == Float.MAX_VALUE) x = 0;
+        if (y == Float.MAX_VALUE) y = 0;
+
+        //draw texture
+        SpriteBatch batch = Engine.getInstance().getCurrentLevel().getBatch();
+        batch.draw(texComp.texture, x, y, originX, originY, w, h, scaleX, scaleY, rot, texOffsetX, texOffsetY, texW, texH, false, false);
+    }
+
+    private void renderTextureAtlas(Entity entity, float deltaTime) {
+        if (!texAtlasMap.has(entity))
+            return;
+
+        TextureAtlasComponent texComp = texAtlasMap.get(entity);
+        TextureRegion region;
+        boolean flipX, flipY;
+
+        if (animMap.has(entity)) {
+            AnimationComponent animComp = animMap.get(entity);
+            animComp.elapsedTime += deltaTime;
+            region = animComp.getAnimation().getKeyFrame(animComp.elapsedTime);
+
+            flipX = animComp.isFlippedX;
+            flipY = animComp.isFlippedY;
+
+        } else {
+
+            region = texComp.textureAtlas.getRegions().get(0);
+
+            flipX = false;
+            flipY = false;
+        }
+
+        // model origin( (0,0) in model-space ) is bot-left corner by
+        // default and rotation and scaling is relative to this point.
+        // We change the to the center of texture.
+        float x, y, originX, originY, w, h, scaleX, scaleY, rot;
+        w = region.getRegionWidth();
+        h = region.getRegionHeight();
+        originX = w / 2;
+        originY = h / 2;
+        scaleX = texComp.scale;
+        scaleY = texComp.scale;
+        rot = sync.getRotation(entity);
+
+        //the portion of texture in texel
+        int texOffsetX, texOffsetY, texW, texH;
+        texOffsetX = region.getRegionX();
+        texOffsetY = region.getRegionY();
+        texW = region.getRegionWidth();
+        texH = region.getRegionHeight();
+
+        // World transformations
+        // taking the new Origin into account
+        x = sync.getX(entity) - originX;
+        y = sync.getY(entity) - originY;
+        if (x == Float.MAX_VALUE) x = 0;
+        if (y == Float.MAX_VALUE) y = 0;
+
+        SpriteBatch batch = Engine.getInstance().getCurrentLevel().getBatch();
+        batch.draw(region.getTexture(), x, y, originX, originY, w, h, scaleX, scaleY, rot, texOffsetX, texOffsetY, texW, texH, flipX, flipY);
+    }
+    //endregion
+
+    //region Sort
+    private Comparator<Entity> comparator = new Comparator<Entity>() {
+        @Override
+        public int compare(Entity e1, Entity e2) {
+
+            return (int) Math.signum(sync.getY(e2) - sync.getY(e1));
+        }
+    };
+    //endregion
+}

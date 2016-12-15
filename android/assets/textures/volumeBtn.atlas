@@ -1,0 +1,19 @@
+volumeBtn.png
+size: 200, 98
+format: RGBA8888
+filter: Linear,Linear
+repeat: none
+01Volume_on
+  rotate: false
+  xy: 0, 0
+  size: 100, 98
+  orig: 100, 98
+  offset: 0, 0
+  index: -1
+02Volume_mute
+  rotate: false
+  xy: 100, 0
+  size: 100, 98
+  orig: 100, 98
+  offset: 0, 0
+  index: -1

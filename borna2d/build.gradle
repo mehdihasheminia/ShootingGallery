@@ -1,0 +1,17 @@
+apply plugin: 'java'
+
+dependencies {
+    compile fileTree(dir: 'libs', include: ['*.jar'])
+}
+
+task deleteJar(type: Delete){
+    delete 'libs/borna2dLib.jar'
+}
+
+task createJar(type: Copy){
+    from('build/intermediates/bundles/release/')
+    into('libs/')
+    include('classes.jar')
+    rename('classes.jar', 'borna2dLib.jar')
+}
+createJar.dependsOn(deleteJar, build)

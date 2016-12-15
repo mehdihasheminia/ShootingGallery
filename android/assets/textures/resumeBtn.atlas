@@ -1,0 +1,19 @@
+resumeBtn.png
+size: 400, 88
+format: RGBA8888
+filter: Linear,Linear
+repeat: none
+01ResumeNormal
+  rotate: false
+  xy: 0, 0
+  size: 200, 88
+  orig: 200, 88
+  offset: 0, 0
+  index: -1
+02ResumeClicked
+  rotate: false
+  xy: 200, 0
+  size: 200, 88
+  orig: 200, 88
+  offset: 0, 0
+  index: -1
