@@ -12,6 +12,9 @@ public class TextureComponent extends Component {
     public float scale = 1.0f;
     public Texture texture;
 
+    public boolean flipX = false;
+    public boolean flipY = false;
+
     //region Methods
 
     //private constructor, as components must be created

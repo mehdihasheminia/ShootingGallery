@@ -23,6 +23,10 @@ public class AStarGraph extends DefaultIndexedGraph<Node> {
         tileLayer = _tileLayer;
     }
 
+    public AStarGraph(int width_inTiles, int height_inTiles, int tileWidth_inPixels, int tileHeight_inPixels) {
+        tileLayer = new TiledMapTileLayer(width_inTiles, height_inTiles, tileWidth_inPixels, tileHeight_inPixels);
+    }
+
     public void InitAs(GraphType type) {
         graphType = type;
         switch (graphType) {

@@ -194,6 +194,7 @@ public class Cat {
         //
         bodyComp = ashleyEngine.createComponent(BodyComponent.class);
         bodyComp.Init_Capsule(BodyDef.BodyType.DynamicBody, 21.0f, 35.0f, position.x, position.y, false, true, collEvent);
+        bodyComp.body.setGravityScale(0);
         entity.add(bodyComp);
         //
         //pathComp = Build.AshleyComponent.PathFinder();
@@ -250,14 +251,14 @@ public class Cat {
                     animComp.setAnimation(anim_Run);
                     //float frameDuration = v<10f ? (1.0f/v) : 0.1f;
                     //anim_Run.setFrameDuration(frameDuration);
-                    if (animComp.isFlippedX)
-                        animComp.isFlippedX = false;
+                    if (texComp.flipX)
+                        texComp.flipX = false;
                 }
                 //Moving left
                 else if ((angle > 90f && angle < 270f)) {
                     animComp.setAnimation(anim_Run);
-                    if (!animComp.isFlippedX)
-                        animComp.isFlippedX = true;
+                    if (!texComp.flipX)
+                        texComp.flipX = true;
                 }
             }
         } else {
@@ -303,11 +304,12 @@ public class Cat {
 
     public boolean isOnFoot() {
         //we have added userData to Fixture2(foot) before, to track its collision
-        if (bodyComp.body.getFixtureList().get(2).getUserData() != null) {
-            CollisionEvent colStat = (CollisionEvent) bodyComp.body.getFixtureList().get(2).getUserData();
-            return (colStat.numCollisions > 0);
-        }
-        return false;
+//        if (bodyComp.body.getFixtureList().get(2).getUserData() != null) {
+//            CollisionEvent colStat = (CollisionEvent) bodyComp.body.getFixtureList().get(2).getUserData();
+//            return (colStat.numCollisions > 0);
+//        }
+//        return false;
+        return true;
     }
 
     public void setCharacterStatus(com.bornaapp.shootingGallery.Characters.CHAR_STATUS stat) {

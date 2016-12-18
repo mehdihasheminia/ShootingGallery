@@ -7,6 +7,8 @@ import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.Body;
 import com.badlogic.gdx.physics.box2d.BodyDef;
+import com.badlogic.gdx.utils.Timer;
+import com.bornaapp.borna2d.PlayStatus;
 import com.bornaapp.borna2d.components.AnimationComponent;
 import com.bornaapp.borna2d.components.BodyComponent;
 import com.bornaapp.borna2d.components.SoundComponent;
@@ -36,7 +38,7 @@ public class Rifle {
         ashleyEngine.addEntity(entity);
         //
         texComp = ashleyEngine.createComponent(TextureAtlasComponent.class);
-        texComp.Init("rifle.atlas", 0.5f);
+        texComp.Init("rifle.atlas", 0.8f);
         entity.add(texComp);
         //
         // Animation Sets
@@ -46,13 +48,16 @@ public class Rifle {
         frames_reload[1] = (texComp.textureAtlas.findRegion("rifle_2"));
         anim_reload = new Animation(1 / 5f, frames_reload);
         anim_reload.setPlayMode(Animation.PlayMode.LOOP);
+
         //
         animComp = ashleyEngine.createComponent(AnimationComponent.class);
         animComp.Init(anim_reload);
+        animComp.setPlayStatus(PlayStatus.Stopped);
         entity.add(animComp);
+
         //
         bodyComp = ashleyEngine.createComponent(BodyComponent.class);
-        bodyComp.Init_Box(BodyDef.BodyType.DynamicBody, 80, 170, position.x, position.y, true, true);
+        bodyComp.Init_Box(BodyDef.BodyType.DynamicBody, 120, 250, position.x, position.y, true, true);
         bodyComp.body.setGravityScale(0);
         entity.add(bodyComp);
 
@@ -69,21 +74,7 @@ public class Rifle {
 
         //  animation
         //
-        float v = bodyComp.body.getLinearVelocity().len();
-        float angle = bodyComp.body.getLinearVelocity().angle();
 
-        //Moving right
-        if ((angle < 90f || angle > 270f)) {
-            if (animComp.isFlippedX)
-                animComp.isFlippedX = false;
-        }
-        //Moving left
-        else if ((angle > 90f && angle < 270f)) {
-            if (!animComp.isFlippedX)
-                animComp.isFlippedX = true;
-        }
-
-        //------------------------
         //  Sound
         //
         //todo: we should not check each rendering frame, we need to do this in collision-callback
@@ -96,6 +87,18 @@ public class Rifle {
 //            soundComp_reload.Play();
 //        else
 //            soundComp_reload.Stop();
+    }
+
+    public void Reload() {
+        animComp.setPlayStatus(PlayStatus.Playing);
+
+        Timer timer = new Timer();
+        timer.scheduleTask(new Timer.Task() {
+            @Override
+            public void run() {
+                    animComp.setPlayStatus(PlayStatus.Stopped);
+            }
+        }, 2);
     }
 }
 

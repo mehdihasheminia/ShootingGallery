@@ -11,6 +11,7 @@ import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.Vector2;
+import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.physics.box2d.Body;
 import com.badlogic.gdx.physics.box2d.World;
 import com.badlogic.gdx.scenes.scene2d.Stage;
@@ -180,13 +181,14 @@ public abstract class LevelBase implements GestureListener {
         // a viewport manages the method the camera uses to map any point
         // in world space to camera space.
         //main viewport
-        viewport = new ExtendViewport(800, 480, camera);
+        viewport = new ExtendViewport(Engine.getInstance().WindowWidth(), Engine.getInstance().WindowHeight(), camera);
         viewport.apply(true);
         viewport.update(Engine.getInstance().WindowWidth(), Engine.getInstance().WindowHeight());
     }
 
     private void SetupUIStage() {
-        uiStage = new Stage(new ExtendViewport(800, 480));
+
+        uiStage = new Stage(new ExtendViewport(Engine.getInstance().WindowWidth(), Engine.getInstance().WindowHeight()));
     }
 
     public OrthographicCamera getCamera() {
@@ -248,6 +250,10 @@ public abstract class LevelBase implements GestureListener {
      * it was before pausing
      */
     protected abstract void onResume();
+
+    public abstract void NextLevel();
+
+    public abstract void RestartLevel();
     //endregion
 
     //region Handling Engine requests
@@ -459,7 +465,5 @@ public abstract class LevelBase implements GestureListener {
 
     //endregion
 
-    public abstract void NextLevel();
 
-    public abstract void RestartLevel();
 }

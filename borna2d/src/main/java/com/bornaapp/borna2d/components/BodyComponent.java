@@ -2,6 +2,7 @@ package com.bornaapp.borna2d.components;
 
 import com.badlogic.ashley.core.Component;
 import com.badlogic.gdx.math.Vector2;
+import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.physics.box2d.Body;
 import com.badlogic.gdx.physics.box2d.BodyDef;
 import com.badlogic.gdx.physics.box2d.CircleShape;
@@ -275,4 +276,16 @@ public class BodyComponent extends Component {
         }
     }
     //endregion
+
+    public boolean MousePicked(float screenX, float screenY) {
+
+        //convert mouse pointer coordinates from screen-space to world-space
+        Vector3 worldCoord = Engine.getInstance().getCurrentLevel().getCamera().unproject(new Vector3(screenX, screenY, 0));
+
+        //convert world-space unit from pixels(rendering) to metres(Box2D)
+        worldCoord.x = PixeltoMeters(worldCoord.x);
+        worldCoord.y = PixeltoMeters(worldCoord.y);
+
+        return body.getFixtureList().first().testPoint(worldCoord.x, worldCoord.y);
+    }
 }

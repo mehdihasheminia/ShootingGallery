@@ -2,6 +2,7 @@ package com.bornaapp.shootingGallery.Characters;
 
 import com.badlogic.ashley.core.Entity;
 import com.badlogic.ashley.core.PooledEngine;
+import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g2d.Animation;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.Vector2;
@@ -9,6 +10,8 @@ import com.badlogic.gdx.physics.box2d.Body;
 import com.badlogic.gdx.physics.box2d.BodyDef;
 import com.badlogic.gdx.physics.box2d.Fixture;
 import com.badlogic.gdx.utils.Array;
+import com.bornaapp.borna2d.ai.AStarGraph;
+import com.bornaapp.borna2d.ai.GraphType;
 import com.bornaapp.borna2d.components.AnimationComponent;
 import com.bornaapp.borna2d.components.BodyComponent;
 import com.bornaapp.borna2d.components.PathComponent;
@@ -31,23 +34,15 @@ public class Bee {
 
     private BodyComponent bodyComp;
 
-    private SoundComponent soundComp_fly;
-    private SoundComponent soundComp_dead;
     public PathComponent pathComp;
-
-    private final float idleSpeed = 0.15f;
 
     private Animation anim_Idle;
     private Animation anim_Hurt;
 
-    private float charStatTimer = 0.0f;
-    private final float resetTime = 0.3f;
-
     private Array<Vector2> destinations = new Array<Vector2>();
     private int currentDestIndex = 0;
-    private float waitTime = 0f;
 
-    public Bee(Vector2 position) {
+    public Bee(Vector2 position, AStarGraph aStarGraph) {
         PooledEngine ashleyEngine = Engine.getInstance().getCurrentLevel().getAshleyEngine();
         //
         entity = ashleyEngine.createEntity();
@@ -93,61 +88,27 @@ public class Bee {
         entity.add(bodyComp);
         //
         pathComp = ashleyEngine.createComponent(PathComponent.class);
-        pathComp.Init(position, Engine.getInstance().getCurrentLevel().getMap().getEdgeGraph());
+        pathComp.Init(position, aStarGraph);
         pathComp.setTravelVelocity(7.5f);
         entity.add(pathComp);
-        //
-//        soundComp_fly = ashleyEngine.createComponent(SoundComponent.class);
-//        soundComp_fly.Init("grass-walk-loop.wav", false, true);
-//        entity.add(soundComp_fly);
-
-//        soundComp_dead = ashleyEngine.createComponent(SoundComponent.class);
-//        soundComp_dead.Init("ouch.wav", false, false);
-//        soundComp_dead.volume = 0.2f;
     }
 
     public void update() {
 
-        //------------------------
         //  animation
         //
-//        if (isLifeFinished()) {
-//            animComp.setAnimation(anim_Hurt);
-//            if (anim_Hurt.isAnimationFinished(animComp.elapsedTime))
-//                dead = true;
-//            return;
-//        }
-
-        float v = bodyComp.body.getLinearVelocity().len();
         float angle = bodyComp.body.getLinearVelocity().angle();
 
-        //Moving right
-        if ((angle < 90f || angle > 270f)) {
-            if (animComp.isFlippedX)
-                animComp.isFlippedX = false;
-        }
-        //Moving left
-        else if ((angle > 90f && angle < 270f)) {
-            if (!animComp.isFlippedX)
-                animComp.isFlippedX = true;
+        if ((angle < 90f || angle > 270f)) { //Moving right
+            if (texComp.flipX)
+                texComp.flipX = false;
+        } else if ((angle > 90f && angle < 270f)) {//Moving left
+            if (!texComp.flipX)
+                texComp.flipX = true;
         }
 
-        //------------------------
-        //  Sound
+        //Movement
         //
-        //todo: we should not check each rendering frame, we need to do this in collision-callback
-//        if (animComp.getAnimation() == anim_Idle)
-//            soundComp_fly.Play();
-//        else
-//            soundComp_fly.Pause();
-//
-//        if (animComp.getAnimation() == anim_Hurt)
-//            soundComp_dead.Play();
-//        else
-//            soundComp_dead.Stop();
-
-        //
-        //behaviour
         if (pathComp.reachedDestination()) {
 
             currentDestIndex++;
@@ -158,9 +119,23 @@ public class Bee {
                 destinations.reverse();
             }
         }
+
+
     }
 
     public void addCheckPoint(Vector2 checkpoint) {
         destinations.add(checkpoint);
+    }
+
+    public boolean isDrawDebug() {
+        return pathComp.drawDebug;
+    }
+
+    public void setDrawDebug(boolean drawDebug) {
+        this.pathComp.drawDebug = drawDebug;
+    }
+
+    public void setDebgColor(Color debgColor) {
+
     }
 }

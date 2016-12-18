@@ -13,6 +13,9 @@ public class TextureAtlasComponent extends Component {
     public float scale = 1.0f;
     public TextureAtlas textureAtlas;
 
+    public boolean flipX = false;
+    public boolean flipY = false;
+
     //region Methods
 
     //private constructor, as components must be created

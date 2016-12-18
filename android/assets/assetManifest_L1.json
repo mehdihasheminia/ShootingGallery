@@ -1,8 +1,9 @@
 {
 "textures": [
-	"textures/coin.atlas",
+	"textures/cat.atlas",
 	"textures/heart.atlas",
-	"textures/rifle.atlas"
+	"textures/rifle.atlas",
+	"textures/bee.atlas"
 ],
 "images": [
 	"images/coinBox.png",
@@ -16,7 +17,10 @@
 ],
 "sounds": [
         "sounds/coin1.wav",
-	"sounds/level-up-01.wav"
+	"sounds/level-up-01.wav",
+	"sounds/grass-walk-loop.wav",
+	"sounds/fins__jumping.wav",
+	"sounds/ouch.wav"
 ],
 "fonts": [
 ]

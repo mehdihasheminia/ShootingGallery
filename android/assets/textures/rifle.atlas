@@ -1,0 +1,19 @@
+rifle.png
+size: 286, 319
+format: RGBA8888
+filter: Linear,Linear
+repeat: none
+rifle_1
+  rotate: false
+  xy: 0, 0
+  size: 142, 319
+  orig: 142, 319
+  offset: 0, 0
+  index: -1
+rifle_2
+  rotate: false
+  xy: 145, 0
+  size: 141, 319
+  orig: 141, 319
+  offset: 0, 0
+  index: -1

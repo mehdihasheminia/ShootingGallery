@@ -2,6 +2,7 @@ package com.bornaapp.borna2d.components;
 
 import com.badlogic.ashley.core.Component;
 import com.badlogic.gdx.graphics.g2d.Animation;
+import com.bornaapp.borna2d.PlayStatus;
 
 /**
  * Created by Mehdi on 09/02/2015.
@@ -10,8 +11,8 @@ import com.badlogic.gdx.graphics.g2d.Animation;
 public class AnimationComponent extends Component {
     private Animation animation;
     public float elapsedTime = 0;
-    public boolean isFlippedX = false;
-    public boolean isFlippedY = false;
+
+    private PlayStatus playStatus = PlayStatus.Playing;
 
     //region Methods
 
@@ -34,5 +35,14 @@ public class AnimationComponent extends Component {
     public Animation getAnimation() {
         return animation;
     }
+
+    public void setPlayStatus(PlayStatus status){
+        playStatus = status;
+    }
+
+    public PlayStatus getPlayStatus(){
+        return playStatus;
+    }
+
     //endregion
 }

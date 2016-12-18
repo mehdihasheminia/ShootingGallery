@@ -7,6 +7,7 @@ import com.badlogic.ashley.systems.IteratingSystem;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.utils.Array;
+import com.bornaapp.borna2d.PlayStatus;
 import com.bornaapp.borna2d.components.AnimationComponent;
 import com.bornaapp.borna2d.components.ParticleComponent;
 import com.bornaapp.borna2d.components.TextureComponent;
@@ -114,9 +115,12 @@ public class RenderingSystem extends IteratingSystem {
         if (x == Float.MAX_VALUE) x = 0;
         if (y == Float.MAX_VALUE) y = 0;
 
+        boolean flipX = texComp.flipX;
+        boolean flipY = texComp.flipY;
+
         //draw texture
         SpriteBatch batch = Engine.getInstance().getCurrentLevel().getBatch();
-        batch.draw(texComp.texture, x, y, originX, originY, w, h, scaleX, scaleY, rot, texOffsetX, texOffsetY, texW, texH, false, false);
+        batch.draw(texComp.texture, x, y, originX, originY, w, h, scaleX, scaleY, rot, texOffsetX, texOffsetY, texW, texH, flipX, flipY);
     }
 
     private void renderTextureAtlas(Entity entity, float deltaTime) {
@@ -129,19 +133,10 @@ public class RenderingSystem extends IteratingSystem {
 
         if (animMap.has(entity)) {
             AnimationComponent animComp = animMap.get(entity);
-            animComp.elapsedTime += deltaTime;
-            region = animComp.getAnimation().getKeyFrame(animComp.elapsedTime);
-
-            flipX = animComp.isFlippedX;
-            flipY = animComp.isFlippedY;
-
-        } else {
-
+            animComp.elapsedTime += (animComp.getPlayStatus() == PlayStatus.Playing ? deltaTime : 0.0f);
+            region = animComp.getAnimation().getKeyFrame(animComp.getPlayStatus() == PlayStatus.Stopped ? 0.0f : animComp.elapsedTime);
+        } else
             region = texComp.textureAtlas.getRegions().get(0);
-
-            flipX = false;
-            flipY = false;
-        }
 
         // model origin( (0,0) in model-space ) is bot-left corner by
         // default and rotation and scaling is relative to this point.
@@ -168,6 +163,9 @@ public class RenderingSystem extends IteratingSystem {
         y = sync.getY(entity) - originY;
         if (x == Float.MAX_VALUE) x = 0;
         if (y == Float.MAX_VALUE) y = 0;
+
+       flipX = texComp.flipX;
+       flipY = texComp.flipY;
 
         SpriteBatch batch = Engine.getInstance().getCurrentLevel().getBatch();
         batch.draw(region.getTexture(), x, y, originX, originY, w, h, scaleX, scaleY, rot, texOffsetX, texOffsetY, texW, texH, flipX, flipY);
