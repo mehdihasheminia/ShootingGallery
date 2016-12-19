@@ -4,16 +4,21 @@ import com.badlogic.ashley.core.ComponentMapper;
 import com.badlogic.ashley.core.Entity;
 import com.badlogic.ashley.core.Family;
 import com.badlogic.ashley.systems.IteratingSystem;
+import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
+import com.badlogic.gdx.maps.tiled.TiledMapImageLayer;
+import com.badlogic.gdx.maps.tiled.TiledMapRenderer;
 import com.badlogic.gdx.utils.Array;
 import com.bornaapp.borna2d.PlayStatus;
 import com.bornaapp.borna2d.components.AnimationComponent;
 import com.bornaapp.borna2d.components.ParticleComponent;
 import com.bornaapp.borna2d.components.TextureComponent;
+import com.bornaapp.borna2d.components.TiledMapLayerComponent;
 import com.bornaapp.borna2d.game.levels.Engine;
 import com.bornaapp.borna2d.components.TextureAtlasComponent;
 import com.bornaapp.borna2d.game.levels.LevelBase;
+import com.bornaapp.borna2d.log;
 
 import java.util.Comparator;
 
@@ -29,6 +34,7 @@ public class RenderingSystem extends IteratingSystem {
     private ComponentMapper<TextureComponent> texMap;
     private ComponentMapper<TextureAtlasComponent> texAtlasMap;
     private ComponentMapper<AnimationComponent> animMap;
+    private ComponentMapper<TiledMapLayerComponent> tileLayerMap;
 
     //region constructor
     public RenderingSystem(LevelBase level) {
@@ -39,6 +45,7 @@ public class RenderingSystem extends IteratingSystem {
         texMap = ComponentMapper.getFor(TextureComponent.class);
         texAtlasMap = ComponentMapper.getFor(TextureAtlasComponent.class);
         animMap = ComponentMapper.getFor(AnimationComponent.class);
+        tileLayerMap = ComponentMapper.getFor(TiledMapLayerComponent.class);
     }
     //endregion
 
@@ -60,6 +67,8 @@ public class RenderingSystem extends IteratingSystem {
             renderTextureAtlas(entity, deltaTime);
             //
             renderParticle(entity, deltaTime);
+            //
+            renderTiledMapLayer(entity);
         }
         batch.end();
 
@@ -170,6 +179,24 @@ public class RenderingSystem extends IteratingSystem {
         SpriteBatch batch = Engine.getInstance().getCurrentLevel().getBatch();
         batch.draw(region.getTexture(), x, y, originX, originY, w, h, scaleX, scaleY, rot, texOffsetX, texOffsetY, texW, texH, flipX, flipY);
     }
+
+    private void renderTiledMapLayer(Entity entity) {
+        if (!tileLayerMap.has(entity))
+            return;
+
+        TiledMapRenderer tiledMapRenderer = Engine.getInstance().getCurrentLevel().getMap().tiledMapRenderer;
+        OrthographicCamera camera = Engine.getInstance().getCurrentLevel().getCamera();
+
+        TiledMapLayerComponent tiledLayerComp = tileLayerMap.get(entity);
+
+        try {
+            tiledMapRenderer.setView(camera);
+            tiledMapRenderer.renderTileLayer(tiledLayerComp.tileLayer);
+
+        } catch (Exception e) {
+            log.error(e.getMessage());
+        }
+    }
     //endregion
 
     //region Sort
@@ -177,7 +204,7 @@ public class RenderingSystem extends IteratingSystem {
         @Override
         public int compare(Entity e1, Entity e2) {
 
-            return (int) Math.signum(sync.getY(e2) - sync.getY(e1));
+            return (int) Math.signum(sync.getZ(e2) - sync.getZ(e1));
         }
     };
     //endregion

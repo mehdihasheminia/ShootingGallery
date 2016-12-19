@@ -6,6 +6,7 @@ import com.badlogic.gdx.math.Vector2;
 import com.bornaapp.borna2d.components.BodyComponent;
 import com.bornaapp.borna2d.components.ParticleComponent;
 import com.bornaapp.borna2d.components.PositionComponent;
+import com.bornaapp.borna2d.components.ZComponent;
 
 /**
  * Created by Hashemi on 12/13/2016.
@@ -17,6 +18,7 @@ import com.bornaapp.borna2d.components.PositionComponent;
 public class Sync {
 
     private ComponentMapper<PositionComponent> posMap = ComponentMapper.getFor(PositionComponent.class);
+    private ComponentMapper<ZComponent> zMap = ComponentMapper.getFor(ZComponent.class);
     private ComponentMapper<BodyComponent> bodyMap = ComponentMapper.getFor(BodyComponent.class);
     private ComponentMapper<ParticleComponent> particleMap = ComponentMapper.getFor(ParticleComponent.class);
 
@@ -70,6 +72,16 @@ public class Sync {
         }
 
         return Float.MAX_VALUE;
+    }
+
+    public float getZ(Entity entity) {
+
+        if (zMap.has(entity)) {
+            ZComponent zComp = zMap.get(entity);
+            return zComp.z;
+        }
+
+        return Integer.MAX_VALUE;
     }
 
     /**

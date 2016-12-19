@@ -1,5 +1,7 @@
 package com.bornaapp.borna2d.game.maps;
 
+import com.badlogic.ashley.core.ComponentMapper;
+import com.badlogic.ashley.core.Entity;
 import com.badlogic.ashley.core.PooledEngine;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.files.FileHandle;
@@ -24,8 +26,14 @@ import com.badlogic.gdx.utils.Json;
 import com.bornaapp.borna2d.ai.AStarGraph;
 import com.bornaapp.borna2d.ai.GraphType;
 import com.bornaapp.borna2d.components.BodyComponent;
+import com.bornaapp.borna2d.components.TiledMapLayerComponent;
+import com.bornaapp.borna2d.components.ZComponent;
 import com.bornaapp.borna2d.game.levels.Engine;
 import com.bornaapp.borna2d.log;
+import com.bornaapp.borna2d.physics.BoxDef;
+import com.bornaapp.borna2d.physics.CircleDef;
+import com.bornaapp.borna2d.physics.LineDef;
+import com.bornaapp.borna2d.physics.PolygonDef;
 
 public abstract class Map {
 
@@ -45,12 +53,14 @@ public abstract class Map {
     private int heightOfEachTile_InPixels;
 
     public TiledMap tiledMap;
-    protected TiledMapRenderer tiledMapRenderer;
+    public TiledMapRenderer tiledMapRenderer;
     public MapParameters params;
 
     private Array<MapLocation> mapLocations;
     private Array<MapArea> areaSensors;
     private Array<MapArea> obstacles;
+
+    private Array<Entity> entities;
 
     Margin[] margins;
 
@@ -61,6 +71,8 @@ public abstract class Map {
 
     AStarGraph diagonalGraph;
     AStarGraph edgeGraph;
+
+    private boolean renderLayersSeparately = false;
 
     //region Loading tiled-Map from Disk
 
@@ -97,6 +109,7 @@ public abstract class Map {
             edgeGraph.InitAs(GraphType.Edge);
             diagonalGraph = new AStarGraph(pathLayer);
             diagonalGraph.InitAs(GraphType.Diagonal);
+
         } catch (Exception e) {
             log.error(e.getMessage());
         }
@@ -129,7 +142,7 @@ public abstract class Map {
             y2 = y1 + 0f;
 
             BodyComponent bodyComp = ashleyEngine.createComponent(BodyComponent.class);
-            bodyComp.Init_Line(BodyDef.BodyType.StaticBody, x1, y1, x2, y2, false, true);
+            bodyComp.Init(BodyDef.BodyType.StaticBody, new LineDef(x1, y1, x2, y2), false, true);
             obstacles.add(new MapArea("TopMargin", bodyComp));
         }
         //Right Margin
@@ -140,7 +153,7 @@ public abstract class Map {
             y2 = y1 + heightInPixels;
 
             BodyComponent bodyComp = ashleyEngine.createComponent(BodyComponent.class);
-            bodyComp.Init_Line(BodyDef.BodyType.StaticBody, x1, y1, x2, y2, false, true);
+            bodyComp.Init(BodyDef.BodyType.StaticBody, new LineDef(x1, y1, x2, y2), false, true);
             obstacles.add(new MapArea("RightMargin", bodyComp));
         }
         //bottom Margin
@@ -151,7 +164,7 @@ public abstract class Map {
             y2 = y1 + 0f;
 
             BodyComponent bodyComp = ashleyEngine.createComponent(BodyComponent.class);
-            bodyComp.Init_Line(BodyDef.BodyType.StaticBody, x1, y1, x2, y2, false, true);
+            bodyComp.Init(BodyDef.BodyType.StaticBody, new LineDef(x1, y1, x2, y2), false, true);
             obstacles.add(new MapArea("BottomMargin", bodyComp));
         }
         //Left Margin
@@ -162,7 +175,7 @@ public abstract class Map {
             y2 = y1 + heightInPixels;
 
             BodyComponent bodyComp = ashleyEngine.createComponent(BodyComponent.class);
-            bodyComp.Init_Line(BodyDef.BodyType.StaticBody, x1, y1, x2, y2, false, true);
+            bodyComp.Init(BodyDef.BodyType.StaticBody, new LineDef(x1, y1, x2, y2), false, true);
             obstacles.add(new MapArea("LeftMargin", bodyComp));
         }
     }
@@ -266,11 +279,10 @@ public abstract class Map {
         //extract data from file
         float x = rect.getRectangle().getX();
         float y = rect.getRectangle().getY();
-        float w = rect.getRectangle().getWidth();
-        float h = rect.getRectangle().getHeight();
+        BoxDef boxDef = new BoxDef(rect.getRectangle().getWidth(), rect.getRectangle().getHeight());
         //
         BodyComponent boxComp = ashleyEngine.createComponent(BodyComponent.class);
-        boxComp.Init_Box(BodyDef.BodyType.StaticBody, w, h, x, y, isSensor, true);
+        boxComp.Init(BodyDef.BodyType.StaticBody, boxDef, x, y, isSensor, true);
         return boxComp;
     }
 
@@ -287,7 +299,7 @@ public abstract class Map {
         }
         //
         BodyComponent polyComp = ashleyEngine.createComponent(BodyComponent.class);
-        polyComp.Init_Polygon(BodyDef.BodyType.StaticBody, vertices, x, y, isSensor, true);
+        polyComp.Init(BodyDef.BodyType.StaticBody, new PolygonDef(vertices), x, y, isSensor, true);
         return polyComp;
     }
 
@@ -295,10 +307,10 @@ public abstract class Map {
         //extract data from file
         float x = circle.getCircle().x;
         float y = circle.getCircle().y;
-        float r = circle.getCircle().radius;
+        CircleDef circleDef = new CircleDef(circle.getCircle().radius);
         //
         BodyComponent circleComp = ashleyEngine.createComponent(BodyComponent.class);
-        circleComp.Init_Circle(BodyDef.BodyType.StaticBody, r, x, y, isSensor, true);
+        circleComp.Init(BodyDef.BodyType.StaticBody, circleDef, x, y, isSensor, true);
         return circleComp;
     }
 
@@ -313,19 +325,66 @@ public abstract class Map {
         // To solve the issue, we consider a default value in this case
         if (w == 0) w = 10.0f;
         if (h == 0) h = 10.0f;
-        float r = Math.max(w, h) / 2;
+        CircleDef circleDef = new CircleDef(Math.max(w, h) / 2);
         //
         BodyComponent bodyComp = ashleyEngine.createComponent(BodyComponent.class);
-        bodyComp.Init_Circle(BodyDef.BodyType.StaticBody, r, x, y, isSensor, true);
+        bodyComp.Init(BodyDef.BodyType.StaticBody, circleDef, x, y, isSensor, true);
         return bodyComp;
     }
     //endregion
 
     //region Rendering
     public void render(OrthographicCamera camera) {
-        if (tiledMapRenderer != null && tiledMap != null) {
-            tiledMapRenderer.setView(camera);
-            tiledMapRenderer.render();
+        if (!renderLayersSeparately) {
+            try {
+                tiledMapRenderer.setView(camera);
+                tiledMapRenderer.render();
+            } catch (Exception e) {
+                log.error(e.getMessage());
+            }
+        }
+    }
+
+    public void EnableLayeredRendering() {
+
+        renderLayersSeparately = true;
+
+        entities = new Array<Entity>();
+        for (MapLayer mapLayer : tiledMap.getLayers()) {
+            try {
+                TiledMapTileLayer tileLayer = (TiledMapTileLayer) mapLayer;
+
+                Entity entity = ashleyEngine.createEntity();
+                ashleyEngine.addEntity(entity);
+
+                TiledMapLayerComponent tiledMapLayerComp = ashleyEngine.createComponent(TiledMapLayerComponent.class);
+                tiledMapLayerComp.Init(tileLayer);
+                entity.add(tiledMapLayerComp);
+
+                ZComponent zComp = ashleyEngine.createComponent(ZComponent.class);
+                zComp.Init();
+                entity.add(zComp);
+
+                entities.add(entity);
+
+            } catch (Exception e) {
+                log.info(mapLayer.getName() + " " + e.getMessage());
+            }
+        }
+    }
+
+    public void InitLayer(String layerName, int z) {
+        if (renderLayersSeparately) {
+            ComponentMapper<TiledMapLayerComponent> tileLayerMap = ComponentMapper.getFor(TiledMapLayerComponent.class);
+            ComponentMapper<ZComponent> zMap = ComponentMapper.getFor(ZComponent.class);
+
+            for (Entity entity : entities) {
+                TiledMapLayerComponent tileComp = tileLayerMap.get(entity);
+                if (tileComp.tileLayer.getName().equals(layerName)) {
+                    ZComponent zComp = zMap.get(entity);
+                    zComp.z = z;
+                }
+            }
         }
     }
     //endregion

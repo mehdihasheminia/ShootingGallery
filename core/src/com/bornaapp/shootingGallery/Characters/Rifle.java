@@ -13,7 +13,9 @@ import com.bornaapp.borna2d.components.AnimationComponent;
 import com.bornaapp.borna2d.components.BodyComponent;
 import com.bornaapp.borna2d.components.SoundComponent;
 import com.bornaapp.borna2d.components.TextureAtlasComponent;
+import com.bornaapp.borna2d.components.ZComponent;
 import com.bornaapp.borna2d.game.levels.Engine;
+import com.bornaapp.borna2d.physics.BoxDef;
 
 /**
  * Created by Hashemi on 12/15/2016.
@@ -30,7 +32,9 @@ public class Rifle {
 
     public BodyComponent bodyComp;
 
-    public Rifle(Vector2 position) {
+    public ZComponent zComp;
+
+    public Rifle() {
 
         PooledEngine ashleyEngine = Engine.getInstance().getCurrentLevel().getAshleyEngine();
         //
@@ -48,16 +52,23 @@ public class Rifle {
         frames_reload[1] = (texComp.textureAtlas.findRegion("rifle_2"));
         anim_reload = new Animation(1 / 5f, frames_reload);
         anim_reload.setPlayMode(Animation.PlayMode.LOOP);
-
         //
         animComp = ashleyEngine.createComponent(AnimationComponent.class);
         animComp.Init(anim_reload);
         animComp.setPlayStatus(PlayStatus.Stopped);
         entity.add(animComp);
-
+        //
+        zComp = ashleyEngine.createComponent(ZComponent.class);
+        zComp.Init();
+        entity.add(zComp);
         //
         bodyComp = ashleyEngine.createComponent(BodyComponent.class);
-        bodyComp.Init_Box(BodyDef.BodyType.DynamicBody, 120, 250, position.x, position.y, true, true);
+        float x, y, w, h;
+        w = 120f;
+        h = 250f;
+        x = (Engine.getInstance().WindowWidth()-w)/2f;
+        y = 0;
+        bodyComp.Init(BodyDef.BodyType.DynamicBody, new BoxDef(w, h), x, y, true, true);
         bodyComp.body.setGravityScale(0);
         entity.add(bodyComp);
 
@@ -96,7 +107,7 @@ public class Rifle {
         timer.scheduleTask(new Timer.Task() {
             @Override
             public void run() {
-                    animComp.setPlayStatus(PlayStatus.Stopped);
+                animComp.setPlayStatus(PlayStatus.Stopped);
             }
         }, 2);
     }

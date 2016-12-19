@@ -13,6 +13,7 @@ import com.bornaapp.borna2d.components.SoundComponent;
 import com.bornaapp.borna2d.components.TextureAtlasComponent;
 import com.bornaapp.borna2d.game.levels.Engine;
 import com.bornaapp.borna2d.log;
+import com.bornaapp.borna2d.physics.CircleDef;
 import com.bornaapp.borna2d.physics.CollisionEvent;
 
 /**
@@ -61,7 +62,7 @@ public class Coin {
         };
 
         bodyComp = ashleyEngine.createComponent(BodyComponent.class);
-        bodyComp.Init_Circle(BodyDef.BodyType.DynamicBody, 10.0f, posX, posY, true, true, collEvent);
+        bodyComp.Init(BodyDef.BodyType.DynamicBody, new CircleDef(10.0f), posX, posY, true, true, collEvent);
         bodyComp.body.setGravityScale(0f);
         entity.add(bodyComp);
         //
@@ -74,11 +75,11 @@ public class Coin {
     public void update() {
     }
 
-    public void ring(){
+    public void ring() {
         soundComp_coin.Play();
     }
 
-    public void remove(){
+    public void remove() {
         //do not release or dispose resources like sound and texture
         // bcs they're common with other instances
         Engine.getInstance().getCurrentLevel().getAshleyEngine().removeEntity(entity);

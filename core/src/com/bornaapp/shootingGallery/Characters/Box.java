@@ -7,6 +7,7 @@ import com.badlogic.gdx.physics.box2d.BodyDef;
 import com.bornaapp.borna2d.components.BodyComponent;
 import com.bornaapp.borna2d.components.TextureComponent;
 import com.bornaapp.borna2d.game.levels.Engine;
+import com.bornaapp.borna2d.physics.BoxDef;
 
 /**
  * Created by Hashemi on 11/8/2016.
@@ -27,7 +28,7 @@ public class Box {
         entity.add(texComp);
         //
         bodyComp = ashleyEngine.createComponent(BodyComponent.class);
-        bodyComp.Init_Box(BodyDef.BodyType.DynamicBody, 65.0f, 65.0f, position.x, position.y, false, false);
+        bodyComp.Init(BodyDef.BodyType.DynamicBody, new BoxDef(65.0f, 65.0f), position.x, position.y, false, false);
         bodyComp.setMaterial(25.0f, 0.5f, 0.5f);
         entity.add(bodyComp);
     }

@@ -1,0 +1,75 @@
+bee.png
+size: 810, 64
+format: RGBA8888
+filter: Linear,Linear
+repeat: none
+Hurt_1
+  rotate: false
+  xy: 0, 0
+  size: 81, 64
+  orig: 81, 64
+  offset: 0, 0
+  index: 1
+Hurt_2
+  rotate: false
+  xy: 81, 0
+  size: 81, 64
+  orig: 81, 64
+  offset: 0, 0
+  index: 2
+Hurt_3
+  rotate: false
+  xy: 162, 0
+  size: 81, 64
+  orig: 81, 64
+  offset: 0, 0
+  index: 3
+Hurt_4
+  rotate: false
+  xy: 243, 0
+  size: 81, 64
+  orig: 81, 64
+  offset: 0, 0
+  index: 4
+Hurt_5
+  rotate: false
+  xy: 324, 0
+  size: 81, 64
+  orig: 81, 64
+  offset: 0, 0
+  index: 5
+Idle_1
+  rotate: false
+  xy: 405, 0
+  size: 81, 64
+  orig: 81, 64
+  offset: 0, 0
+  index: 1
+Idle_2
+  rotate: false
+  xy: 486, 0
+  size: 81, 64
+  orig: 81, 64
+  offset: 0, 0
+  index: 2
+Idle_3
+  rotate: false
+  xy: 567, 0
+  size: 81, 64
+  orig: 81, 64
+  offset: 0, 0
+  index: 3
+Idle_4
+  rotate: false
+  xy: 648, 0
+  size: 81, 64
+  orig: 81, 64
+  offset: 0, 0
+  index: 4
+Idle_5
+  rotate: false
+  xy: 729, 0
+  size: 81, 64
+  orig: 81, 64
+  offset: 0, 0
+  index: 5

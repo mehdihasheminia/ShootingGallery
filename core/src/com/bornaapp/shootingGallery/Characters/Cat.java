@@ -14,6 +14,7 @@ import com.bornaapp.borna2d.components.SoundComponent;
 import com.bornaapp.borna2d.components.TextureAtlasComponent;
 import com.bornaapp.borna2d.game.levels.Engine;
 import com.bornaapp.borna2d.log;
+import com.bornaapp.borna2d.physics.CapsuleDef;
 import com.bornaapp.borna2d.physics.CollisionEvent;
 
 /**
@@ -193,7 +194,7 @@ public class Cat {
         };
         //
         bodyComp = ashleyEngine.createComponent(BodyComponent.class);
-        bodyComp.Init_Capsule(BodyDef.BodyType.DynamicBody, 21.0f, 35.0f, position.x, position.y, false, true, collEvent);
+        bodyComp.Init(BodyDef.BodyType.DynamicBody, new CapsuleDef(21.0f, 35.0f), position.x, position.y, false, true, collEvent);
         bodyComp.body.setGravityScale(0);
         entity.add(bodyComp);
         //

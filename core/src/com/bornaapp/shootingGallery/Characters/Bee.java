@@ -17,8 +17,10 @@ import com.bornaapp.borna2d.components.BodyComponent;
 import com.bornaapp.borna2d.components.PathComponent;
 import com.bornaapp.borna2d.components.SoundComponent;
 import com.bornaapp.borna2d.components.TextureAtlasComponent;
+import com.bornaapp.borna2d.components.ZComponent;
 import com.bornaapp.borna2d.game.levels.Engine;
 import com.bornaapp.borna2d.log;
+import com.bornaapp.borna2d.physics.CircleDef;
 import com.bornaapp.borna2d.physics.CollisionEvent;
 
 /**
@@ -38,6 +40,8 @@ public class Bee {
 
     private Animation anim_Idle;
     private Animation anim_Hurt;
+
+    public ZComponent zComp;
 
     private Array<Vector2> destinations = new Array<Vector2>();
     private int currentDestIndex = 0;
@@ -82,8 +86,12 @@ public class Bee {
             }
         };
         //
+        zComp = ashleyEngine.createComponent(ZComponent.class);
+        zComp.Init();
+        entity.add(zComp);
+        //
         bodyComp = ashleyEngine.createComponent(BodyComponent.class);
-        bodyComp.Init_Circle(BodyDef.BodyType.DynamicBody, 15f, position.x, position.y, false, true, collEvent);
+        bodyComp.Init(BodyDef.BodyType.DynamicBody, new CircleDef(15f), position.x, position.y, false, true, collEvent);
         bodyComp.body.setGravityScale(0);
         entity.add(bodyComp);
         //

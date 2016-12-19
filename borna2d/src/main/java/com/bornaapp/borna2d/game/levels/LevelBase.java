@@ -70,6 +70,7 @@ public abstract class LevelBase implements GestureListener {
 
     private PooledEngine ashleyEngine = new PooledEngine();
     int systemPriority;
+    int defaultZ = 0;
 
     //region Constructor
 
@@ -156,6 +157,10 @@ public abstract class LevelBase implements GestureListener {
 
     public int getSystemPriority() {
         return systemPriority++;
+    }
+
+    public int getDefaultZ() {
+        return defaultZ++;
     }
     //endregion
 

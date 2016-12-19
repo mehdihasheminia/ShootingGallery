@@ -1,6 +1,7 @@
 package com.bornaapp.borna2d.components;
 
 import com.badlogic.ashley.core.Component;
+import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.physics.box2d.Body;
@@ -12,8 +13,13 @@ import com.badlogic.gdx.physics.box2d.FixtureDef;
 import com.badlogic.gdx.physics.box2d.PolygonShape;
 import com.badlogic.gdx.physics.box2d.Shape;
 import com.bornaapp.borna2d.game.levels.Engine;
-import com.bornaapp.borna2d.log;
+import com.bornaapp.borna2d.physics.BoxDef;
+import com.bornaapp.borna2d.physics.CapsuleDef;
+import com.bornaapp.borna2d.physics.CircleDef;
 import com.bornaapp.borna2d.physics.CollisionEvent;
+import com.bornaapp.borna2d.physics.LineDef;
+import com.bornaapp.borna2d.physics.PolygonDef;
+import com.bornaapp.borna2d.physics.ShapeDef;
 
 /**
  * Created by Mehdi on 08/29/2015.
@@ -22,15 +28,20 @@ import com.bornaapp.borna2d.physics.CollisionEvent;
 public class BodyComponent extends Component {
 
     public Body body;
+    public ShapeDef shapeDef;
 
     //region Methods
 
-    //private constructor, as components must be created
-    //using Ashley Engine and initialize afterwards.
-    private BodyComponent() {
+    //protected constructor, as components must only
+    //be created using Ashley Engine or child classes.
+    protected BodyComponent() {
     }
 
-    public void Init_Circle(BodyDef.BodyType bodyType, float r, float x, float y, boolean isSensor, boolean fixedRotation, CollisionEvent event) {
+    public void Init(BodyDef.BodyType bodyType, CircleDef circleDef, float x, float y, boolean isSensor, boolean fixedRotation, CollisionEvent event) {
+
+        shapeDef = circleDef;
+
+        float r = circleDef.r;
 
         if (r <= 0.0f) r = 1.0f;
 
@@ -64,11 +75,16 @@ public class BodyComponent extends Component {
         shape.dispose();
     }
 
-    public void Init_Circle(BodyDef.BodyType bodyType, float r, float x, float y, boolean isSensor, boolean fixedRotation) {
-        Init_Circle(bodyType, r, x, y, isSensor, fixedRotation, null);
+    public void Init(BodyDef.BodyType bodyType, CircleDef circleDef, float x, float y, boolean isSensor, boolean fixedRotation) {
+        Init(bodyType, circleDef, x, y, isSensor, fixedRotation, null);
     }
 
-    public void Init_Box(BodyDef.BodyType bodyType, float width, float height, float x, float y, boolean isSensor, boolean fixedRotation, CollisionEvent event) {
+    public void Init(BodyDef.BodyType bodyType, BoxDef boxDef, float x, float y, boolean isSensor, boolean fixedRotation, CollisionEvent event) {
+
+        shapeDef = boxDef;
+
+        float width = boxDef.width;
+        float height = boxDef.height;
 
         if (width <= 0.0f) width = 1.0f;
         if (height <= 0.0f) height = 1.0f;
@@ -104,12 +120,16 @@ public class BodyComponent extends Component {
         shape.dispose();
     }
 
-    public void Init_Box(BodyDef.BodyType bodyType, float width, float height, float x, float y, boolean isSensor, boolean fixedRotation) {
-        Init_Box(bodyType, width, height, x, y, isSensor, fixedRotation, null);
+    public void Init(BodyDef.BodyType bodyType, BoxDef boxDef, float x, float y, boolean isSensor, boolean fixedRotation) {
+        Init(bodyType, boxDef, x, y, isSensor, fixedRotation, null);
     }
 
-    public void Init_Polygon(BodyDef.BodyType bodyType, Vector2[] vertices, float x, float y, boolean isSensor, boolean fixedRotation, CollisionEvent event) {
+    public void Init(BodyDef.BodyType bodyType, PolygonDef polygonDef, float x, float y, boolean isSensor, boolean fixedRotation, CollisionEvent event) {
+
+        shapeDef = polygonDef;
+
         //Box2D only supports convex polygons of 8 vertices max
+        Vector2[] vertices = polygonDef.vertices;
 
         for (int i = 0; i < vertices.length; i++) {
             vertices[i] = new Vector2(PixeltoMeters(vertices[i].x), PixeltoMeters(vertices[i].y));
@@ -141,16 +161,21 @@ public class BodyComponent extends Component {
         shape.dispose();
     }
 
-    public void Init_Polygon(BodyDef.BodyType bodyType, Vector2[] vertices, float x, float y, boolean isSensor, boolean fixedRotation) {
-        Init_Polygon(bodyType, vertices, x, y, isSensor, fixedRotation, null);
+    public void Init(BodyDef.BodyType bodyType, PolygonDef polygonDef, float x, float y, boolean isSensor, boolean fixedRotation) {
+        Init(bodyType, polygonDef, x, y, isSensor, fixedRotation, null);
     }
 
-    public void Init_Line(BodyDef.BodyType bodyType, float x1, float y1, float x2, float y2, boolean isSensor, boolean fixedRotation, CollisionEvent event) {
+    public void Init(BodyDef.BodyType bodyType, LineDef lineDef, boolean isSensor, boolean fixedRotation, CollisionEvent event) {
 
-        x1 = PixeltoMeters(x1);
-        y1 = PixeltoMeters(y1);
-        x2 = PixeltoMeters(x2);
-        y2 = PixeltoMeters(y2);
+        shapeDef = lineDef;
+
+        Vector2 p1 = lineDef.point1.cpy();
+        Vector2 p2 = lineDef.point2.cpy();
+
+        p1.x = PixeltoMeters(p1.x);
+        p1.y = PixeltoMeters(p1.y);
+        p2.x = PixeltoMeters(p2.x);
+        p2.y = PixeltoMeters(p2.y);
 
         //body properties
         BodyDef bodyDef = new BodyDef();
@@ -159,7 +184,7 @@ public class BodyComponent extends Component {
 
         FixtureDef fixDef = new FixtureDef();
         Shape shape = new EdgeShape();
-        ((EdgeShape) shape).set(new Vector2(x1, y1), new Vector2(x2, y2));
+        ((EdgeShape) shape).set(p1, p2);
         fixDef.shape = shape;
         fixDef.isSensor = isSensor;
         fixDef.density = 1.0f;
@@ -174,11 +199,16 @@ public class BodyComponent extends Component {
         shape.dispose();
     }
 
-    public void Init_Line(BodyDef.BodyType bodyType, float x1, float y1, float x2, float y2, boolean isSensor, boolean fixedRotation) {
-        Init_Line(bodyType, x1, y1, x2, y2, isSensor, fixedRotation, null);
+    public void Init(BodyDef.BodyType bodyType, LineDef lineDef, boolean isSensor, boolean fixedRotation) {
+        Init(bodyType, lineDef, isSensor, fixedRotation, null);
     }
 
-    public void Init_Capsule(BodyDef.BodyType bodyType, float r, float h, float x, float y, boolean isSensor, boolean fixedRotation, CollisionEvent event) {
+    public void Init(BodyDef.BodyType bodyType, CapsuleDef capsuleDef, float x, float y, boolean isSensor, boolean fixedRotation, CollisionEvent event) {
+
+        shapeDef = capsuleDef;
+
+        float r = capsuleDef.r;
+        float h = capsuleDef.h;
 
         r = PixeltoMeters(r);
         h = PixeltoMeters(h);
@@ -236,8 +266,8 @@ public class BodyComponent extends Component {
         footShape.dispose();
     }
 
-    public void Init_Capsule(BodyDef.BodyType bodyType, float r, float h, float x, float y, boolean isSensor, boolean fixedRotation) {
-        Init_Capsule(bodyType, r, h, x, y, isSensor, fixedRotation, null);
+    public void Init(BodyDef.BodyType bodyType, CapsuleDef capsuleDef, float x, float y, boolean isSensor, boolean fixedRotation) {
+        Init(bodyType, capsuleDef, x, y, isSensor, fixedRotation, null);
     }
 
     //Box2D units are different from LibGdx rendering units
@@ -277,7 +307,7 @@ public class BodyComponent extends Component {
     }
     //endregion
 
-    public boolean MousePicked(float screenX, float screenY) {
+    public boolean isPickedByMouse(float screenX, float screenY) {
 
         //convert mouse pointer coordinates from screen-space to world-space
         Vector3 worldCoord = Engine.getInstance().getCurrentLevel().getCamera().unproject(new Vector3(screenX, screenY, 0));
@@ -286,6 +316,15 @@ public class BodyComponent extends Component {
         worldCoord.x = PixeltoMeters(worldCoord.x);
         worldCoord.y = PixeltoMeters(worldCoord.y);
 
-        return body.getFixtureList().first().testPoint(worldCoord.x, worldCoord.y);
+        //check if this point is in contact with any fixtures
+        for (Fixture fixture : body.getFixtureList()) {
+            if (fixture.testPoint(worldCoord.x, worldCoord.y))
+                return true;
+        }
+        return false;
+    }
+
+    public Rectangle getAABB() {
+        return null;
     }
 }

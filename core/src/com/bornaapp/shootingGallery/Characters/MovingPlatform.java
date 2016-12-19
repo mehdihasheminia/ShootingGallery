@@ -8,6 +8,7 @@ import com.badlogic.gdx.utils.Array;
 import com.bornaapp.borna2d.components.BodyComponent;
 import com.bornaapp.borna2d.components.TextureComponent;
 import com.bornaapp.borna2d.game.levels.Engine;
+import com.bornaapp.borna2d.physics.BoxDef;
 
 
 /**
@@ -38,7 +39,7 @@ public class MovingPlatform {
         entity.add(texComp);
         //
         bodyComp = ashleyEngine.createComponent(BodyComponent.class);
-        bodyComp.Init_Box(BodyDef.BodyType.KinematicBody, width, height, position.x, position.y, false, false);
+        bodyComp.Init(BodyDef.BodyType.KinematicBody, new BoxDef(width, height), position.x, position.y, false, false);
         bodyComp.setMaterial(1.0f, 0.0f, 1.0f);
         entity.add(bodyComp);
 

@@ -13,6 +13,7 @@ import com.bornaapp.borna2d.components.SoundComponent;
 import com.bornaapp.borna2d.components.TextureAtlasComponent;
 import com.bornaapp.borna2d.game.levels.Engine;
 import com.bornaapp.borna2d.log;
+import com.bornaapp.borna2d.physics.CircleDef;
 import com.bornaapp.borna2d.physics.CollisionEvent;
 
 /**
@@ -58,7 +59,7 @@ public class Heart {
         };
 
         bodyComp = ashleyEngine.createComponent(BodyComponent.class);
-        bodyComp.Init_Circle(BodyDef.BodyType.DynamicBody, 15.0f, posX, posY, true, true, collEvent);
+        bodyComp.Init(BodyDef.BodyType.DynamicBody, new CircleDef(15.0f), posX, posY, true, true, collEvent);
         bodyComp.body.setGravityScale(0f);
         entity.add(bodyComp);
         //
