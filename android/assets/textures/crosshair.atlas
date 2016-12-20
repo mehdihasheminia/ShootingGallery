@@ -1,0 +1,19 @@
+crosshair.png
+size: 103, 54
+format: RGBA8888
+filter: Linear,Linear
+repeat: none
+crosshair_large
+  rotate: false
+  xy: 0, 0
+  size: 54, 54
+  orig: 54, 54
+  offset: 0, 0
+  index: -1
+crosshair_small
+  rotate: false
+  xy: 57, 0
+  size: 46, 46
+  orig: 46, 46
+  offset: 0, 0
+  index: -1

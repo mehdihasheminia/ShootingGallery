@@ -3,7 +3,8 @@
 	"textures/cat.atlas",
 	"textures/heart.atlas",
 	"textures/rifle.atlas",
-	"textures/bee.atlas"
+	"textures/bee.atlas",
+	"textures/crosshair.atlas"
 ],
 "images": [
 	"images/coinBox.png",
