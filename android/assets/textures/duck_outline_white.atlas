@@ -1,0 +1,89 @@
+duck_outline_white.png
+size: 512, 512
+format: RGBA8888
+filter: Linear,Linear
+repeat: none
+spin_0
+  rotate: false
+  xy: 0, 0
+  size: 120, 130
+  orig: 120, 130
+  offset: 0, 0
+  index: 0
+spin_1
+  rotate: false
+  xy: 122, 0
+  size: 120, 130
+  orig: 120, 130
+  offset: 0, 0
+  index: 1
+spin_2
+  rotate: false
+  xy: 244, 0
+  size: 120, 130
+  orig: 120, 130
+  offset: 0, 0
+  index: 2
+spin_3
+  rotate: false
+  xy: 366, 0
+  size: 120, 130
+  orig: 120, 130
+  offset: 0, 0
+  index: 3
+spin_4
+  rotate: false
+  xy: 0, 132
+  size: 120, 130
+  orig: 120, 130
+  offset: 0, 0
+  index: 4
+spin_5
+  rotate: false
+  xy: 122, 132
+  size: 120, 130
+  orig: 120, 130
+  offset: 0, 0
+  index: 5
+spin_6
+  rotate: false
+  xy: 244, 132
+  size: 120, 130
+  orig: 120, 130
+  offset: 0, 0
+  index: 6
+spin_7
+  rotate: false
+  xy: 366, 132
+  size: 120, 130
+  orig: 120, 130
+  offset: 0, 0
+  index: 7
+spin_8
+  rotate: false
+  xy: 0, 264
+  size: 120, 130
+  orig: 120, 130
+  offset: 0, 0
+  index: 8
+spin_9
+  rotate: false
+  xy: 122, 264
+  size: 120, 130
+  orig: 120, 130
+  offset: 0, 0
+  index: 9
+spin_10
+  rotate: false
+  xy: 244, 264
+  size: 120, 130
+  orig: 120, 130
+  offset: 0, 0
+  index: 10
+spin_11
+  rotate: false
+  xy: 366, 264
+  size: 120, 130
+  orig: 120, 130
+  offset: 0, 0
+  index: 11

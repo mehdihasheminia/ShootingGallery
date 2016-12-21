@@ -4,24 +4,34 @@ import com.badlogic.ashley.core.Entity;
 import com.badlogic.ashley.core.PooledEngine;
 import com.badlogic.gdx.graphics.g2d.Animation;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
+import com.badlogic.gdx.physics.box2d.Body;
+import com.badlogic.gdx.physics.box2d.BodyDef;
+import com.badlogic.gdx.physics.box2d.Fixture;
 import com.badlogic.gdx.utils.Timer;
 import com.bornaapp.borna2d.PlayStatus;
 import com.bornaapp.borna2d.components.AnimationComponent;
+import com.bornaapp.borna2d.components.BodyComponent;
 import com.bornaapp.borna2d.components.PositionComponent;
 import com.bornaapp.borna2d.components.TextureAtlasComponent;
 import com.bornaapp.borna2d.components.ZComponent;
 import com.bornaapp.borna2d.game.levels.Engine;
+import com.bornaapp.borna2d.physics.CircleDef;
+import com.bornaapp.borna2d.physics.CollisionEvent;
 
 /**
  * Created by Mehdi on 12/19/2016.
  */
 public class Crosshair {
+    public boolean bulletIsTravelling = false;
+    Timer shotTimer = new Timer();
+    float shotDuration = 0.1f;
+
     private TextureAtlasComponent texComp;
 
     private AnimationComponent animComp;
     private Animation anim_shoot;
 
-    public PositionComponent posComp;
+    public BodyComponent bodyComp;
 
     public ZComponent zComp;
 
@@ -49,9 +59,13 @@ public class Crosshair {
         animComp.setPlayStatus(PlayStatus.Stopped);
         entity.add(animComp);
         //
-        posComp = ashleyEngine.createComponent(PositionComponent.class);
-        posComp.Init(x, y);
-        entity.add(posComp);
+        bodyComp = ashleyEngine.createComponent(BodyComponent.class);
+        bodyComp.Init(BodyDef.BodyType.DynamicBody, new CircleDef(5f), x, y, true, true, new CollisionEvent(this) {
+            @Override
+            public void onBeginContact(Object collidedObject, Body collidedBody, Fixture collidedFixture) {}
+        });
+        bodyComp.body.setGravityScale(0);
+        entity.add(bodyComp);
         //
         zComp = ashleyEngine.createComponent(ZComponent.class);
         zComp.Init();
@@ -63,14 +77,16 @@ public class Crosshair {
     }
 
     public void Shoot() {
+        bulletIsTravelling = true;
         animComp.setPlayStatus(PlayStatus.Playing);
 
-        Timer timer = new Timer();
-        timer.scheduleTask(new Timer.Task() {
+        bulletIsTravelling = true;
+        shotTimer.scheduleTask(new Timer.Task() {
             @Override
             public void run() {
+                bulletIsTravelling = false;
                 animComp.setPlayStatus(PlayStatus.Stopped);
             }
-        }, 1/10f);
+        }, shotDuration);
     }
 }

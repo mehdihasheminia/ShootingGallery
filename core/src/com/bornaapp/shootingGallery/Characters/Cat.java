@@ -165,7 +165,7 @@ public class Cat {
         //
         final CollisionEvent collEvent = new CollisionEvent(this) {
             @Override
-            public void onCollision(Object collidedObject, Body collidedBody, Fixture collidedFixture) {
+            public void onBeginContact(Object collidedObject, Body collidedBody, Fixture collidedFixture) {
 
                 //Coin
                 if (collidedObject.getClass().getName().equals(Coin.class.getName())) {

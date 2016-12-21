@@ -46,34 +46,51 @@ public class CollisionListener implements ContactListener {
         }
 
         if (eventA_valid && eventB_valid) {
-            eventA.onCollision(eventB.owner, fixtureB.getBody(), fixtureB);
-            eventB.onCollision(eventA.owner, fixtureA.getBody(), fixtureA);
+            eventA.onBeginContact(eventB.owner, fixtureB.getBody(), fixtureB);
+            eventB.onBeginContact(eventA.owner, fixtureA.getBody(), fixtureA);
         }
     }
 
     @Override
     public void endContact(Contact contact) {
 
+        //Checking the validity of parameters and extracting them
+        //
         Fixture fixtureA = contact.getFixtureA();
         Fixture fixtureB = contact.getFixtureB();
 
-        if (fixtureA.getUserData() != null) {
-            try {
-                CollisionEvent eventA = (CollisionEvent) fixtureA.getUserData();
-                if (!fixtureA.isSensor())
-                    eventA.numCollisions--;
-            } catch (Exception e) {
-                log.error(e.getMessage());
-            }
+        CollisionEvent eventA = null, eventB = null;
+        boolean eventA_valid, eventB_valid;
+
+        try {
+            eventA = (CollisionEvent) fixtureA.getUserData();
+            eventA_valid = (eventA != null);
+        } catch (Exception e) {
+            eventA_valid = false;
         }
-        if (fixtureB.getUserData() != null) {
-            try {
-                CollisionEvent eventB = (CollisionEvent) fixtureB.getUserData();
-                if (!fixtureB.isSensor())
-                    eventB.numCollisions--;
-            } catch (Exception e) {
-                log.error(e.getMessage());
-            }
+
+        try {
+            eventB = (CollisionEvent) fixtureB.getUserData();
+            eventB_valid = (eventB != null);
+        } catch (Exception e) {
+            eventB_valid = false;
+        }
+
+        //processing data and dispatching callbacks
+        //
+        if (eventA_valid) {
+            if (!fixtureA.isSensor())
+                eventA.numCollisions--;
+        }
+
+        if (eventB_valid) {
+            if (!fixtureA.isSensor())
+                eventB.numCollisions--;
+        }
+
+        if (eventA_valid && eventB_valid) {
+            eventA.onEndContact(eventB.owner, fixtureB.getBody(), fixtureB);
+            eventB.onEndContact(eventA.owner, fixtureA.getBody(), fixtureA);
         }
     }
 

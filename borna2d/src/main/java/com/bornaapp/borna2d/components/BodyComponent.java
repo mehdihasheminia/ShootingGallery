@@ -290,6 +290,10 @@ public class BodyComponent extends Component {
         return new Vector2(MetertoPixels(bodyPos.x), MetertoPixels(bodyPos.y));
     }
 
+    public void setPositionOfCenter_inPixels(float x, float y) {
+        body.setTransform(PixeltoMeters(x), PixeltoMeters(y), 0f);
+    }
+
     public void setMaterial(float density, float restitution, float friction) {
         // restitution value must be between 0.0f & 1.0f
         if (restitution > 1.0f) restitution = 1.0f;
@@ -307,7 +311,7 @@ public class BodyComponent extends Component {
     }
     //endregion
 
-    public boolean isPickedByMouse(float screenX, float screenY) {
+    public boolean ContainsPointOfScreenCoord(float screenX, float screenY) {
 
         //convert mouse pointer coordinates from screen-space to world-space
         Vector3 worldCoord = Engine.getInstance().getCurrentLevel().getCamera().unproject(new Vector3(screenX, screenY, 0));
@@ -324,7 +328,18 @@ public class BodyComponent extends Component {
         return false;
     }
 
-    public Rectangle getAABB() {
-        return null;
+    public boolean ContainsPoint(float x, float y) {
+
+        //convert world-space unit from pixels(rendering) to metres(Box2D)
+        x = PixeltoMeters(x);
+        y = PixeltoMeters(y);
+
+        //check if this point is in contact with any fixtures
+        for (Fixture fixture : body.getFixtureList()) {
+            if (fixture.testPoint(x, y))
+                return true;
+        }
+        return false;
     }
+
 }

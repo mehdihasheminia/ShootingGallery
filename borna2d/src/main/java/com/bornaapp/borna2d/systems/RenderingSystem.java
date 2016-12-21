@@ -144,6 +144,8 @@ public class RenderingSystem extends IteratingSystem {
             AnimationComponent animComp = animMap.get(entity);
             animComp.elapsedTime += (animComp.getPlayStatus() == PlayStatus.Playing ? deltaTime : 0.0f);
             region = animComp.getAnimation().getKeyFrame(animComp.getPlayStatus() == PlayStatus.Stopped ? 0.0f : animComp.elapsedTime);
+            if(animComp.getPlayStatus() == PlayStatus.Stopped)
+                animComp.elapsedTime = 0f;
         } else
             region = texComp.textureAtlas.getRegions().get(0);
 

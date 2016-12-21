@@ -4,7 +4,8 @@
 	"textures/heart.atlas",
 	"textures/rifle.atlas",
 	"textures/bee.atlas",
-	"textures/crosshair.atlas"
+	"textures/crosshair.atlas",
+	"textures/duck_outline_white.atlas"
 ],
 "images": [
 	"images/coinBox.png",

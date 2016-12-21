@@ -82,7 +82,7 @@ public class Bee {
         //
         final CollisionEvent collEvent = new CollisionEvent(this) {
             @Override
-            public void onCollision(Object collidedObject, Body collidedBody, Fixture collidedFixture) {
+            public void onBeginContact(Object collidedObject, Body collidedBody, Fixture collidedFixture) {
             }
         };
         //

@@ -15,5 +15,7 @@ public abstract class CollisionEvent {
         owner = _owner;
     }
 
-    public abstract void onCollision(Object collidedObject, Body collidedBody, Fixture collidedFixture);
+    public abstract void onBeginContact(Object collidedObject, Body collidedBody, Fixture collidedFixture);
+
+    public void onEndContact(Object collidedObject, Body collidedBody, Fixture collidedFixture){};
 }
