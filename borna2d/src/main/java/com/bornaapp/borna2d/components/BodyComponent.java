@@ -1,7 +1,6 @@
 package com.bornaapp.borna2d.components;
 
 import com.badlogic.ashley.core.Component;
-import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.physics.box2d.Body;
@@ -13,6 +12,7 @@ import com.badlogic.gdx.physics.box2d.FixtureDef;
 import com.badlogic.gdx.physics.box2d.PolygonShape;
 import com.badlogic.gdx.physics.box2d.Shape;
 import com.bornaapp.borna2d.game.levels.Engine;
+import com.bornaapp.borna2d.log;
 import com.bornaapp.borna2d.physics.BoxDef;
 import com.bornaapp.borna2d.physics.CapsuleDef;
 import com.bornaapp.borna2d.physics.CircleDef;
@@ -28,51 +28,153 @@ import com.bornaapp.borna2d.physics.ShapeDef;
 public class BodyComponent extends Component {
 
     public Body body;
-    public ShapeDef shapeDef;
-
-    //region Methods
+    public ShapeDef shapeDef; //<---doesnt work for bodies composed of several fixture
 
     //protected constructor, as components must only
     //be created using Ashley Engine or child classes.
     protected BodyComponent() {
     }
 
-    public void Init(BodyDef.BodyType bodyType, CircleDef circleDef, float x, float y, boolean isSensor, boolean fixedRotation, CollisionEvent event) {
+    //region Core Body & Fixture initialization methods
+    public void CreateBody(BodyDef.BodyType bodyType, float x, float y, boolean fixedRotation) {
+        //body properties
+        BodyDef bodyDef = new BodyDef();
+        bodyDef.type = bodyType;
+        bodyDef.fixedRotation = fixedRotation;
+        // Box2D position is relative to center of body.
+        bodyDef.position.set(PixeltoMeters(x), PixeltoMeters(y));
+        body = Engine.getInstance().getCurrentLevel().getWorld().createBody(bodyDef);
+    }
 
-        shapeDef = circleDef;
+    public void AddFixture(CircleDef circleDef, float offsetX, float offsetY, boolean isSensor, CollisionEvent event) {
 
         float r = circleDef.r;
 
         if (r <= 0.0f) r = 1.0f;
 
         r = PixeltoMeters(r);
-        x = PixeltoMeters(x);
-        y = PixeltoMeters(y);
+        offsetX = PixeltoMeters(offsetX);
+        offsetY = PixeltoMeters(offsetY);
 
-        //body properties
-        BodyDef bodyDef = new BodyDef();
-        bodyDef.type = bodyType;
-        bodyDef.fixedRotation = fixedRotation;
-        // Box2D position is relative to center of body.
-        // However, to be compatible with other Libs,
-        // we offset this to be relative to bot-left.
-        bodyDef.position.set(x + r, y + r);
+        FixtureDef fixtureDef = new FixtureDef();
+        CircleShape shape = new CircleShape();
+        shape.setRadius(r);
+        shape.setPosition(new Vector2(offsetX, offsetY));
+        fixtureDef.shape = shape;
+        fixtureDef.isSensor = isSensor;
+        fixtureDef.density = 1.0f;
+        fixtureDef.restitution = 0.05f;
+        fixtureDef.friction = 1.0f;
+        //apply to body
+        body.createFixture(fixtureDef).setUserData(event);
+        //deallocate unnecessary  elements
+        shape.dispose();
+    }
+
+    public void AddFixture(BoxDef boxDef, float offsetX, float offsetY, boolean isSensor, CollisionEvent event) {
+
+        float width = boxDef.width;
+        float height = boxDef.height;
+
+        if (width <= 0.0f) width = 1.0f;
+        if (height <= 0.0f) height = 1.0f;
+
+        width = PixeltoMeters(width);
+        height = PixeltoMeters(height);
+        offsetX = PixeltoMeters(offsetX);
+        offsetY = PixeltoMeters(offsetY);
 
         FixtureDef fixDef = new FixtureDef();
-        Shape shape = new CircleShape();
-        shape.setRadius(r);
+        PolygonShape shape = new PolygonShape();
+        shape.setAsBox(width / 2, height / 2, new Vector2(offsetX, offsetY), 0);
         fixDef.shape = shape;
         fixDef.isSensor = isSensor;
         fixDef.density = 1.0f;
-        fixDef.restitution = 0.05f; //value must be between 0.0f & 1.0f
-        fixDef.friction = 1.0f;     //value must be between 0.0f & 1.0f
-
+        fixDef.restitution = 0.05f;
+        fixDef.friction = 1.0f;
         // applying properties to body
-        body = Engine.getInstance().getCurrentLevel().getWorld().createBody(bodyDef);
         body.createFixture(fixDef).setUserData(event);
-
         //deallocate unnecessary  elements
         shape.dispose();
+    }
+
+    public void AddFixture(PolygonDef polygonDef, float offsetX, float offsetY, boolean isSensor, CollisionEvent event) {
+
+        //Box2D only supports convex polygons of 8 vertices max
+        Vector2[] vertices = polygonDef.vertices;
+
+        offsetX = PixeltoMeters(offsetX);
+        offsetY = PixeltoMeters(offsetY);
+
+        for (int i = 0; i < vertices.length; i++) {
+            vertices[i] = new Vector2(PixeltoMeters(vertices[i].x) + offsetX, PixeltoMeters(vertices[i].y) + offsetY);
+        }
+
+        FixtureDef fixDef = new FixtureDef();
+        PolygonShape shape = new PolygonShape();
+        shape.set(vertices);
+        fixDef.shape = shape;
+        fixDef.isSensor = isSensor;
+        fixDef.density = 1.0f;
+        fixDef.restitution = 0.05f;
+        fixDef.friction = 1.0f;
+        // applying properties to body
+        body.createFixture(fixDef).setUserData(event);
+        //deallocate unnecessary  elements
+        shape.dispose();
+    }
+
+    public void AddFixture(LineDef lineDef, float offsetX, float offsetY, boolean isSensor, CollisionEvent event) {
+
+        Vector2 p1 = lineDef.point1.cpy();
+        Vector2 p2 = lineDef.point2.cpy();
+
+        offsetX = PixeltoMeters(offsetX);
+        offsetY = PixeltoMeters(offsetY);
+
+        p1.x = PixeltoMeters(p1.x + offsetX);
+        p1.y = PixeltoMeters(p1.y + offsetY);
+        p2.x = PixeltoMeters(p2.x + offsetX);
+        p2.y = PixeltoMeters(p2.y + offsetY);
+
+        FixtureDef fixDef = new FixtureDef();
+        Shape shape = new EdgeShape();
+        ((EdgeShape) shape).set(p1, p2);
+        fixDef.shape = shape;
+        fixDef.isSensor = isSensor;
+        fixDef.density = 1.0f;
+        fixDef.restitution = 0.05f;
+        fixDef.friction = 1.0f;
+        // applying properties to body
+        body.createFixture(fixDef).setUserData(event);
+        //deallocate unnecessary  elements
+        shape.dispose();
+    }
+
+    public void AddFixture(CapsuleDef capsuleDef, float offsetX, float offsetY, boolean isSensor, CollisionEvent headEvent, CollisionEvent trunkEvent, CollisionEvent footEvent) {
+
+        float r = capsuleDef.r;
+        float h = capsuleDef.h;
+
+        //central rectangle(trunk) fixture
+        AddFixture(new BoxDef(2 * r, h), offsetX, offsetY, isSensor, trunkEvent);
+
+        //top circle fixture
+        AddFixture(new CircleDef(r), offsetX, offsetY + h / 2, isSensor, headEvent);
+
+        //bottom circle fixture
+        AddFixture(new CircleDef(r), offsetX, offsetY - h / 2, isSensor, footEvent);
+    }
+    //endregion
+
+    //region body easy-initialization methods
+    public void Init(BodyDef.BodyType bodyType, CircleDef circleDef, float x, float y, boolean isSensor, boolean fixedRotation, CollisionEvent event) {
+
+        shapeDef = circleDef;
+
+        CreateBody(bodyType, x, y, fixedRotation);
+
+        AddFixture(circleDef, 0f, 0f, isSensor, event);
     }
 
     public void Init(BodyDef.BodyType bodyType, CircleDef circleDef, float x, float y, boolean isSensor, boolean fixedRotation) {
@@ -83,41 +185,9 @@ public class BodyComponent extends Component {
 
         shapeDef = boxDef;
 
-        float width = boxDef.width;
-        float height = boxDef.height;
+        CreateBody(bodyType, x, y, fixedRotation);
 
-        if (width <= 0.0f) width = 1.0f;
-        if (height <= 0.0f) height = 1.0f;
-
-        width = PixeltoMeters(width);
-        height = PixeltoMeters(height);
-        x = PixeltoMeters(x);
-        y = PixeltoMeters(y);
-
-        //body properties
-        BodyDef bodyDef = new BodyDef();
-        bodyDef.type = bodyType;
-        bodyDef.fixedRotation = fixedRotation;
-        // Box2D position is relative to center of body.
-        // However, to be compatible with other Libs,
-        // we offset this to be relative to bot-left.
-        bodyDef.position.set(x + width / 2, y + height / 2);
-
-        FixtureDef fixDef = new FixtureDef();
-        Shape shape = new PolygonShape();
-        ((PolygonShape) shape).setAsBox(width / 2, height / 2); //TODO why w/2 ?
-        fixDef.shape = shape;
-        fixDef.isSensor = isSensor;
-        fixDef.density = 1.0f;
-        fixDef.restitution = 0.05f;
-        fixDef.friction = 1.0f;
-
-        // applying properties to body
-        body = Engine.getInstance().getCurrentLevel().getWorld().createBody(bodyDef);
-        body.createFixture(fixDef).setUserData(event);
-
-        //deallocate unnecessary  elements
-        shape.dispose();
+        AddFixture(boxDef, 0f, 0f, isSensor, event);
     }
 
     public void Init(BodyDef.BodyType bodyType, BoxDef boxDef, float x, float y, boolean isSensor, boolean fixedRotation) {
@@ -128,37 +198,9 @@ public class BodyComponent extends Component {
 
         shapeDef = polygonDef;
 
-        //Box2D only supports convex polygons of 8 vertices max
-        Vector2[] vertices = polygonDef.vertices;
+        CreateBody(bodyType, x, y, fixedRotation);
 
-        for (int i = 0; i < vertices.length; i++) {
-            vertices[i] = new Vector2(PixeltoMeters(vertices[i].x), PixeltoMeters(vertices[i].y));
-        }
-
-        x = PixeltoMeters(x);
-        y = PixeltoMeters(y);
-
-        //body properties
-        BodyDef bodyDef = new BodyDef();
-        bodyDef.type = bodyType;
-        bodyDef.fixedRotation = fixedRotation;
-        bodyDef.position.set(x, y);
-
-        FixtureDef fixDef = new FixtureDef();
-        PolygonShape shape = new PolygonShape();
-        shape.set(vertices);
-        fixDef.shape = shape;
-        fixDef.isSensor = isSensor;
-        fixDef.density = 1.0f;
-        fixDef.restitution = 0.05f;
-        fixDef.friction = 1.0f;
-
-        // applying properties to body
-        body = Engine.getInstance().getCurrentLevel().getWorld().createBody(bodyDef);
-        body.createFixture(fixDef).setUserData(event);
-
-        //deallocate unnecessary  elements
-        shape.dispose();
+        AddFixture(polygonDef, 0f, 0f, isSensor, event);
     }
 
     public void Init(BodyDef.BodyType bodyType, PolygonDef polygonDef, float x, float y, boolean isSensor, boolean fixedRotation) {
@@ -169,117 +211,26 @@ public class BodyComponent extends Component {
 
         shapeDef = lineDef;
 
-        Vector2 p1 = lineDef.point1.cpy();
-        Vector2 p2 = lineDef.point2.cpy();
+        CreateBody(bodyType, 0, 0, fixedRotation);
 
-        p1.x = PixeltoMeters(p1.x);
-        p1.y = PixeltoMeters(p1.y);
-        p2.x = PixeltoMeters(p2.x);
-        p2.y = PixeltoMeters(p2.y);
-
-        //body properties
-        BodyDef bodyDef = new BodyDef();
-        bodyDef.type = bodyType;
-        bodyDef.fixedRotation = fixedRotation;
-
-        FixtureDef fixDef = new FixtureDef();
-        Shape shape = new EdgeShape();
-        ((EdgeShape) shape).set(p1, p2);
-        fixDef.shape = shape;
-        fixDef.isSensor = isSensor;
-        fixDef.density = 1.0f;
-        fixDef.restitution = 0.05f;
-        fixDef.friction = 1.0f;
-
-        // applying properties to body
-        body = Engine.getInstance().getCurrentLevel().getWorld().createBody(bodyDef);
-        body.createFixture(fixDef).setUserData(event);
-
-        //deallocate unnecessary  elements
-        shape.dispose();
+        AddFixture(lineDef, 0f, 0f, isSensor, event);
     }
 
     public void Init(BodyDef.BodyType bodyType, LineDef lineDef, boolean isSensor, boolean fixedRotation) {
         Init(bodyType, lineDef, isSensor, fixedRotation, null);
     }
 
-    public void Init(BodyDef.BodyType bodyType, CapsuleDef capsuleDef, float x, float y, boolean isSensor, boolean fixedRotation, CollisionEvent event) {
+    public void Init(BodyDef.BodyType bodyType, CapsuleDef capsuleDef, float x, float y, boolean isSensor, boolean fixedRotation, CollisionEvent headEvent, CollisionEvent trunkEvent, CollisionEvent footEvent) {
 
         shapeDef = capsuleDef;
 
-        float r = capsuleDef.r;
-        float h = capsuleDef.h;
+        CreateBody(bodyType, x, y, fixedRotation);
 
-        r = PixeltoMeters(r);
-        h = PixeltoMeters(h);
-        x = PixeltoMeters(x);
-        y = PixeltoMeters(y);
-
-        if (r <= 0.0f) r = 1.0f;
-        if (h <= 0.0f) h = 1.0f;
-
-        BodyDef bodyDef = new BodyDef();
-        bodyDef.type = bodyType;
-        bodyDef.fixedRotation = fixedRotation;
-        // Box2D position is relative to center of body.
-        // However, to be compatible with other Libs,
-        // we offset this to be relative to bot-left.
-        bodyDef.position.set(x + r, y + r + h / 2);
-        body = Engine.getInstance().getCurrentLevel().getWorld().createBody(bodyDef);
-
-        //central rectangle fixture
-        FixtureDef boxFixDef = new FixtureDef();
-        Shape boxShape = new PolygonShape();
-        ((PolygonShape) boxShape).setAsBox(r * 0.95f, h / 2, new Vector2(0, 0), 0.0f);
-        boxFixDef.shape = boxShape;
-        boxFixDef.isSensor = isSensor;
-        boxFixDef.density = 1.0f;
-        boxFixDef.restitution = 0.05f;
-        boxFixDef.friction = 1.0f;
-        body.createFixture(boxFixDef);
-        boxShape.dispose();
-
-        //top circle fixture
-        FixtureDef headFixDef = new FixtureDef();
-        CircleShape headShape = new CircleShape();
-        headShape.setRadius(r);
-        headShape.setPosition(new Vector2(0, h / 2));
-        headFixDef.shape = headShape;
-        headFixDef.isSensor = isSensor;
-        headFixDef.density = 1.0f;
-        headFixDef.restitution = 0.05f;
-        headFixDef.friction = 1.0f;
-        body.createFixture(headFixDef);
-        headShape.dispose();
-
-        //bottom circle fixture
-        FixtureDef footFixDef = new FixtureDef();
-        CircleShape footShape = new CircleShape();
-        footShape.setRadius(r);
-        footShape.setPosition(new Vector2(0, -h / 2));
-        footFixDef.shape = footShape;
-        footFixDef.isSensor = isSensor;
-        footFixDef.density = 1.0f;
-        footFixDef.restitution = 0.05f;
-        footFixDef.friction = 1.0f;
-        body.createFixture(footFixDef).setUserData(event);
-        footShape.dispose();
+        AddFixture(capsuleDef, 0f, 0f, isSensor, headEvent, trunkEvent, footEvent);
     }
 
     public void Init(BodyDef.BodyType bodyType, CapsuleDef capsuleDef, float x, float y, boolean isSensor, boolean fixedRotation) {
-        Init(bodyType, capsuleDef, x, y, isSensor, fixedRotation, null);
-    }
-
-    //Box2D units are different from LibGdx rendering units
-    //
-    private float PixeltoMeters(float distanceInPixels) {
-        int ppm = Engine.getInstance().getConfig().ppm;
-        return distanceInPixels / ppm;
-    }
-
-    private float MetertoPixels(float distanceInMeters) {
-        int ppm = Engine.getInstance().getConfig().ppm;
-        return distanceInMeters * ppm;
+        Init(bodyType, capsuleDef, x, y, isSensor, fixedRotation, null, null, null);
     }
     //endregion
 
@@ -311,6 +262,7 @@ public class BodyComponent extends Component {
     }
     //endregion
 
+    //region Utilities
     public boolean ContainsPointOfScreenCoord(float screenX, float screenY) {
 
         //convert mouse pointer coordinates from screen-space to world-space
@@ -342,4 +294,21 @@ public class BodyComponent extends Component {
         return false;
     }
 
+    //endregion
+
+    //region Unit-Converters
+
+    //Box2D units are different from LibGdx rendering units
+    //
+    private float PixeltoMeters(float distanceInPixels) {
+        int ppm = Engine.getInstance().getConfig().ppm;
+        return distanceInPixels / ppm;
+    }
+
+    private float MetertoPixels(float distanceInMeters) {
+        int ppm = Engine.getInstance().getConfig().ppm;
+        return distanceInMeters * ppm;
+    }
+
+    //endregion
 }

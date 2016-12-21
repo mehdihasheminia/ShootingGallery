@@ -5,23 +5,27 @@ import com.badlogic.gdx.graphics.g2d.TextureAtlas;
 import com.bornaapp.borna2d.game.levels.Engine;
 
 /**
- * Created by Mehdi on 09/02/2015.
- * ...
+ * Created by Mehdi on 12/21/2016.
  */
-public class TextureAtlasComponent extends DrawingComponent {
+public abstract class DrawingComponent extends Component {
 
     public TextureAtlas textureAtlas;
+
+    public float scale = 1.0f;
+
+    public boolean flipX = false;
+    public boolean flipY = false;
+
+    public float offsetX = 0f;
+    public float offsetY = 0f;
 
     //region Methods
 
     //private constructor, as components must be created
     //using Ashley Engine and initialize afterwards.
-    private TextureAtlasComponent() {}
+    protected DrawingComponent() {}
 
-    public void Init(String _Path, float _scale) {
-        textureAtlas = Engine.getInstance().getCurrentLevel().getAssetManager().getTextureAtlas(_Path);
-        super.scale = _scale;
-    }
+    public abstract void Init(String _Path, float _scale) ;
 
     //endregion
 }

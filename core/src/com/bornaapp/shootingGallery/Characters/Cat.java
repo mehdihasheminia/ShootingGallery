@@ -163,7 +163,9 @@ public class Cat {
         animComp.Init(anim_Idle);
         entity.add(animComp);
         //
-        final CollisionEvent collEvent = new CollisionEvent(this) {
+        CollisionEvent headColEvent = null;
+        CollisionEvent trunkColEvent = null;
+        final CollisionEvent footColEvent = new CollisionEvent(this) {
             @Override
             public void onBeginContact(Object collidedObject, Body collidedBody, Fixture collidedFixture) {
 
@@ -192,9 +194,9 @@ public class Cat {
                 }
             }
         };
-        //
+
         bodyComp = ashleyEngine.createComponent(BodyComponent.class);
-        bodyComp.Init(BodyDef.BodyType.DynamicBody, new CapsuleDef(21.0f, 35.0f), position.x, position.y, false, true, collEvent);
+        bodyComp.Init(BodyDef.BodyType.DynamicBody, new CapsuleDef(21.0f, 35.0f), position.x, position.y, false, true, headColEvent, trunkColEvent, footColEvent);
         bodyComp.body.setGravityScale(0);
         entity.add(bodyComp);
         //

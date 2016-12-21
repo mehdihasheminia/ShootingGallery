@@ -103,8 +103,8 @@ public class RenderingSystem extends IteratingSystem {
         float w, h, originX, originY, scaleX, scaleY, rot;
         w = texComp.texture.getWidth();
         h = texComp.texture.getHeight();
-        originX = w / 2;
-        originY = h / 2;
+        originX = texComp.offsetX + w / 2;
+        originY = texComp.offsetY + h / 2;
         scaleX = texComp.scale;
         scaleY = texComp.scale;
         rot = sync.getRotation(entity);
@@ -144,7 +144,7 @@ public class RenderingSystem extends IteratingSystem {
             AnimationComponent animComp = animMap.get(entity);
             animComp.elapsedTime += (animComp.getPlayStatus() == PlayStatus.Playing ? deltaTime : 0.0f);
             region = animComp.getAnimation().getKeyFrame(animComp.getPlayStatus() == PlayStatus.Stopped ? 0.0f : animComp.elapsedTime);
-            if(animComp.getPlayStatus() == PlayStatus.Stopped)
+            if (animComp.getPlayStatus() == PlayStatus.Stopped)
                 animComp.elapsedTime = 0f;
         } else
             region = texComp.textureAtlas.getRegions().get(0);
@@ -155,8 +155,8 @@ public class RenderingSystem extends IteratingSystem {
         float x, y, originX, originY, w, h, scaleX, scaleY, rot;
         w = region.getRegionWidth();
         h = region.getRegionHeight();
-        originX = w / 2;
-        originY = h / 2;
+        originX = texComp.offsetX + w / 2;
+        originY = texComp.offsetY + h / 2;
         scaleX = texComp.scale;
         scaleY = texComp.scale;
         rot = sync.getRotation(entity);
@@ -175,8 +175,8 @@ public class RenderingSystem extends IteratingSystem {
         if (x == Float.MAX_VALUE) x = 0;
         if (y == Float.MAX_VALUE) y = 0;
 
-       flipX = texComp.flipX;
-       flipY = texComp.flipY;
+        flipX = texComp.flipX;
+        flipY = texComp.flipY;
 
         SpriteBatch batch = Engine.getInstance().getCurrentLevel().getBatch();
         batch.draw(region.getTexture(), x, y, originX, originY, w, h, scaleX, scaleY, rot, texOffsetX, texOffsetY, texW, texH, flipX, flipY);

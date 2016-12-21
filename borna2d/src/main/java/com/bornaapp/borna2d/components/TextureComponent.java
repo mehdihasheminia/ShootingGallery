@@ -7,25 +7,21 @@ import com.bornaapp.borna2d.game.levels.Engine;
 /**
  * Created by Hashemi on 11/7/2016.
  */
-public class TextureComponent extends Component {
+public class TextureComponent extends DrawingComponent {
 
-    public float scale = 1.0f;
     public Texture texture;
-
-    public boolean flipX = false;
-    public boolean flipY = false;
 
     //region Methods
 
     //private constructor, as components must be created
     //using Ashley Engine and initialize afterwards.
-    private TextureComponent(){};
+    private TextureComponent(){}
 
+    @Override
     public void Init(String _Path, float _scale){
         texture = Engine.getInstance().getCurrentLevel().getAssetManager().getTexture(_Path);
-        scale = _scale;
+        super.scale = _scale;
     }
-
     //endregion
 
 }

@@ -4,6 +4,7 @@ import com.badlogic.ashley.core.Entity;
 import com.badlogic.ashley.core.PooledEngine;
 import com.badlogic.gdx.graphics.g2d.Animation;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
+import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.Body;
 import com.badlogic.gdx.physics.box2d.BodyDef;
 import com.badlogic.gdx.physics.box2d.Fixture;
@@ -14,10 +15,12 @@ import com.bornaapp.borna2d.components.BodyComponent;
 import com.bornaapp.borna2d.components.TextureAtlasComponent;
 import com.bornaapp.borna2d.components.ZComponent;
 import com.bornaapp.borna2d.game.levels.Engine;
-import com.bornaapp.borna2d.log;
 import com.bornaapp.borna2d.physics.BoxDef;
+import com.bornaapp.borna2d.physics.CapsuleDef;
 import com.bornaapp.borna2d.physics.CircleDef;
 import com.bornaapp.borna2d.physics.CollisionEvent;
+import com.bornaapp.borna2d.physics.LineDef;
+import com.bornaapp.borna2d.physics.PolygonDef;
 
 /**
  * Created by Hashemi on 12/21/2016.
@@ -44,6 +47,8 @@ public class DuckWhite {
         //
         texComp = ashleyEngine.createComponent(TextureAtlasComponent.class);
         texComp.Init("duck_outline_white.atlas", 0.8f);
+        texComp.offsetX = -4f;
+        texComp.offsetY = -20.0f;
         entity.add(texComp);
         //
         // Animation Sets
@@ -74,25 +79,45 @@ public class DuckWhite {
         entity.add(zComp);
         //
         bodyComp = ashleyEngine.createComponent(BodyComponent.class);
-        bodyComp.Init(BodyDef.BodyType.DynamicBody, new CircleDef(15), x, y, true, true, new CollisionEvent(this) {
+        bodyComp.CreateBody(BodyDef.BodyType.DynamicBody, x, y, true);
+        //target fixture
+        bodyComp.AddFixture(new CircleDef(17), 0f, 0f, true, new CollisionEvent(this) {
             @Override
             public void onBeginContact(Object collidedObject, Body collidedBody, Fixture collidedFixture) {
-                if(collidedObject instanceof Crosshair)
+                if (collidedObject instanceof Crosshair)
                     isUnderTarget = true;
             }
 
             @Override
-        public void onEndContact(Object collidedObject, Body collidedBody, Fixture collidedFixture){
-                if(collidedObject instanceof Crosshair)
+            public void onEndContact(Object collidedObject, Body collidedBody, Fixture collidedFixture) {
+                if (collidedObject instanceof Crosshair)
                     isUnderTarget = false;
             }
         });
+        //head fixture
+        bodyComp.AddFixture(new CircleDef(20), 15f, 40f, true, null);
+        //tail fixture
+        bodyComp.AddFixture(new CapsuleDef(10f,25f), -40f, +20f, true, null,null,null);
+
+//        bodyComp.Init(BodyDef.BodyType.DynamicBody, new CircleDef(17), x, y, true, true, new CollisionEvent(this) {
+//            @Override
+//            public void onBeginContact(Object collidedObject, Body collidedBody, Fixture collidedFixture) {
+//                if (collidedObject instanceof Crosshair)
+//                    isUnderTarget = true;
+//            }
+//
+//            @Override
+//            public void onEndContact(Object collidedObject, Body collidedBody, Fixture collidedFixture) {
+//                if (collidedObject instanceof Crosshair)
+//                    isUnderTarget = false;
+//            }
+//        });
         bodyComp.body.setGravityScale(0);
         entity.add(bodyComp);
     }
 
     public void update(boolean isbulletTravelling) {
-        if(isUnderTarget && isbulletTravelling)
+        if (isUnderTarget && isbulletTravelling)
             Spin();
     }
 
@@ -108,7 +133,7 @@ public class DuckWhite {
         }, 1);
     }
 
-    public void fall(){
+    public void fall() {
         bodyComp.body.setGravityScale(1.0f);
     }
 }
