@@ -4,6 +4,7 @@ import com.badlogic.ashley.core.Entity;
 import com.badlogic.ashley.core.PooledEngine;
 import com.badlogic.gdx.graphics.g2d.Animation;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
+import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.Body;
 import com.badlogic.gdx.physics.box2d.BodyDef;
@@ -14,7 +15,9 @@ import com.bornaapp.borna2d.components.AnimationComponent;
 import com.bornaapp.borna2d.components.BodyComponent;
 import com.bornaapp.borna2d.components.TextureAtlasComponent;
 import com.bornaapp.borna2d.components.ZComponent;
+import com.bornaapp.borna2d.game.levels.Delegate;
 import com.bornaapp.borna2d.game.levels.Engine;
+import com.bornaapp.borna2d.log;
 import com.bornaapp.borna2d.physics.CircleDef;
 import com.bornaapp.borna2d.physics.CollisionEvent;
 import com.bornaapp.borna2d.physics.PolygonDef;
@@ -24,8 +27,10 @@ import com.bornaapp.borna2d.physics.PolygonDef;
  */
 public abstract class Duck {
 
+    Entity entity;
+
     //values
-    protected boolean flipped = false;
+    public boolean flipped = false;
     protected String textPath;
     protected float scale;
     protected float texOffsetX;
@@ -36,6 +41,18 @@ public abstract class Duck {
     protected float headOffsetX;
     protected float headOffsetY;
 
+    protected Vector2 startPosition;
+    protected float linearVelocity;
+    protected float oscillationRadius;
+    protected float oscillationSpeed;
+
+    protected float missX;
+    //
+    protected float LineY;
+    private float elapsedTime = 0.0f;
+    private boolean isFalling = false;
+
+    //
     public boolean centerTargeted = false;
     public boolean marginTargeted = false;
 
@@ -50,11 +67,14 @@ public abstract class Duck {
 
     public abstract void Init();
 
-    protected Duck(float x, float y) {
+    protected Duck(float _lineY, boolean _flipped) {
+
+        flipped = _flipped;
+        LineY = _lineY;
 
         PooledEngine ashleyEngine = Engine.getInstance().getCurrentLevel().getAshleyEngine();
         //
-        Entity entity = ashleyEngine.createEntity();
+        entity = ashleyEngine.createEntity();
         ashleyEngine.addEntity(entity);
         //
         // Initialize parameters
@@ -102,7 +122,7 @@ public abstract class Duck {
         // Physical body component
         //
         bodyComp = ashleyEngine.createComponent(BodyComponent.class);
-        bodyComp.CreateBody(BodyDef.BodyType.DynamicBody, x, y, true);
+        bodyComp.CreateBody(BodyDef.BodyType.DynamicBody, startPosition.x, startPosition.y, true);
         //target fixture
         bodyComp.AddFixture(new CircleDef(targetR), 0f, 0f, true, new CollisionEvent(this) {
             @Override
@@ -129,6 +149,10 @@ public abstract class Duck {
             public void onEndContact(Object collidedObject, Body collidedBody, Fixture collidedFixture) {
                 if (collidedObject instanceof Crosshair)
                     marginTargeted = false;
+                //
+                //check contact with margins
+                //
+
             }
         });
         //head fixture
@@ -149,14 +173,22 @@ public abstract class Duck {
         entity.add(bodyComp);
     }
 
-    public void update(boolean isbulletTravelling) {
-        if (isbulletTravelling) {
-            if (centerTargeted && marginTargeted)
-                fall();
-            else if (centerTargeted)
-                fall();
-            else if (marginTargeted)
-                Spin();
+    public void update(boolean isBulletTravelling) {
+        if (!isFalling) {
+            //Hit test
+            if (isBulletTravelling) {
+                if (centerTargeted)
+                    fall();
+                else if (marginTargeted)
+                    Spin();
+            }
+            //Movement
+            elapsedTime += Engine.getInstance().getCurrentLevel().deltaTime();
+            Vector2 pos = bodyComp.getPositionOfCenter_inPixels();
+            pos.x += linearVelocity;
+            pos.y = LineY + MathUtils.sin(oscillationSpeed * elapsedTime * MathUtils.PI) * oscillationRadius;
+            bodyComp.setPositionOfCenter_inPixels(pos.x, pos.y);
+            //
         }
     }
 
@@ -173,6 +205,14 @@ public abstract class Duck {
     }
 
     public void fall() {
+        isFalling = true;
         bodyComp.body.setGravityScale(1.0f);
+        Engine.getInstance().getCurrentLevel().ExecuteDelegate("Fall");
+    }
+
+    public void Missed() {
+        Engine.getInstance().getCurrentLevel().ExecuteDelegate("Missed");
+        bodyComp.Destroy();
+        Engine.getInstance().getCurrentLevel().getAshleyEngine().removeEntity(entity);
     }
 }

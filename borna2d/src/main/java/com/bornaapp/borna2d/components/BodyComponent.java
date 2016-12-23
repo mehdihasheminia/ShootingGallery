@@ -311,4 +311,8 @@ public class BodyComponent extends Component {
     }
 
     //endregion
+
+    public void Destroy(){
+        Engine.getInstance().getCurrentLevel().AddToKillList(body);
+    }
 }

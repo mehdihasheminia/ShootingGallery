@@ -19,6 +19,7 @@ import com.badlogic.gdx.utils.viewport.ExtendViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
 import com.bornaapp.borna2d.OnScreenDisplay;
 import com.bornaapp.borna2d.asset.Assets;
+import com.bornaapp.borna2d.game.maps.Map;
 import com.bornaapp.borna2d.game.maps.OrthogonalMap;
 import com.bornaapp.borna2d.graphics.Background;
 import com.bornaapp.borna2d.graphics.GrayscaleShader;
@@ -36,6 +37,8 @@ import box2dLight.RayHandler;
  */
 public abstract class LevelBase implements GestureListener {
 
+    private ArrayList<Delegate> delegates = new ArrayList<Delegate>();
+
     private boolean created = false;
     public boolean paused = false;
 
@@ -50,7 +53,7 @@ public abstract class LevelBase implements GestureListener {
     public Stage uiStage = new Stage();
     public boolean debugUI = false;
 
-    private com.bornaapp.borna2d.game.maps.Map map = new OrthogonalMap();
+    private Map map = new OrthogonalMap();
 
     public Background background;
     public ParallaxBackground parallax;
@@ -259,6 +262,20 @@ public abstract class LevelBase implements GestureListener {
     public abstract void NextLevel();
 
     public abstract void RestartLevel();
+
+    //endregion
+
+    //region Delegates
+    public void AddDelegate(Delegate _delegate){
+        delegates.add(_delegate);
+    }
+
+    public void ExecuteDelegate(String _name){
+        for(Delegate delegate:delegates){
+            if(delegate.name.equals(_name))
+                delegate.Execute();
+        }
+    }
     //endregion
 
     //region Handling Engine requests
@@ -469,6 +486,4 @@ public abstract class LevelBase implements GestureListener {
     }
 
     //endregion
-
-
 }
