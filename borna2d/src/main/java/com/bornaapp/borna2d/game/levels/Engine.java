@@ -17,8 +17,6 @@ public final class Engine {
 
     private final static Engine instance = new Engine();
 
-    private final String saveFilepath = "save.json";
-    public SaveInterface saveInterface = new SaveInterface();
     private EngineConfig engineConfig = new EngineConfig();
 
     private Array<LevelBase> levels = new Array<LevelBase>();
@@ -27,52 +25,80 @@ public final class Engine {
     private float masterVolume = 1.0f;
     private boolean mute = false;
 
-    //region constructor & initialization
-    private Engine(){}
+    //region Singleton construction & instantiation
+
+    private Engine() {
+    }
 
     public static Engine getInstance() {
         return instance;
     }
 
-    public void Init() {
-
-        LoadEngineConfigFromFile();
-
-        if (Gdx.files.internal(saveFilepath).exists())
-            ReadSaveFile();
-        else
-            WriteSaveFile();
-    }
     //endregion
 
     //region Load/save game data and configurations
+    public class Save {
 
-    public SaveInterface ReadSaveFile() {
-        try {
-            FileHandle file = Gdx.files.internal(saveFilepath);
-            Json json = new Json();
-            saveInterface = json.fromJson(SaveInterface.class, file);
-            return saveInterface;
-        } catch (Exception e) {
-            log.error(e.getMessage());
+        private final String saveFilepath = "save.json";
+        private SlotCollection slotCollection = new SlotCollection();
+
+        public boolean fileExist(){
+            return Gdx.files.internal(saveFilepath).exists();
+        }
+
+        public void AddSaveSlot(Slot slot) {
+            slotCollection.slots.add(slot);
+        }
+
+        public boolean SaveSlotExits(String _name) {
+            for (Slot s : slotCollection.slots) {
+                if (s.name.equals(_name))
+                    return true;
+            }
+            return false;
+        }
+
+        public Slot getSaveSlot(String _name) {
+            for (Slot s : slotCollection.slots) {
+                if (s.name.equals(_name))
+                    return s;
+            }
             return null;
         }
-    }
 
-    public void WriteSaveFile() {
-        try {
-            Json json = new Json();
+        public SlotCollection ReadSaveFile() {
+            try {
+                FileHandle file = Gdx.files.internal(saveFilepath);
+                Json json = new Json();
+                slotCollection = json.fromJson(SlotCollection.class, file);
+                return slotCollection;
+            } catch (Exception e) {
+                log.error(e.getMessage());
+                return null;
+            }
+        }
 
-            json.setUsePrototypes(false);
-            json.setOutputType(JsonWriter.OutputType.json);
-            FileHandle file = new FileHandle(saveFilepath);
-            file.writeString(json.prettyPrint(saveInterface), false);
-            //confirmation message
-            System.out.println(file + " : created");
-        } catch (Exception e) {
-            log.error(e.getMessage());
+        public void WriteSaveFile() {
+            try {
+                Json json = new Json();
+
+                json.setUsePrototypes(false);
+                json.setOutputType(JsonWriter.OutputType.json);
+                FileHandle file = new FileHandle(saveFilepath);
+                file.writeString(json.prettyPrint(slotCollection), false);
+                //confirmation message
+                System.out.println(file + " : created");
+            } catch (Exception e) {
+                log.error(e.getMessage());
+            }
         }
     }
+    public Save save = new Save();
+
+
+    //endregion
+
+    //region data and configurations
 
     private void LoadEngineConfigFromFile() {
         engineConfig = null;
@@ -88,6 +114,7 @@ public final class Engine {
     public EngineConfig getConfig() {
         return engineConfig;
     }
+
     //endregion
 
     //region level manager
@@ -132,6 +159,16 @@ public final class Engine {
 
     //region Handling application requests
 
+    public void create() {
+
+        LoadEngineConfigFromFile();
+
+        if (save.fileExist())
+            save.ReadSaveFile();
+        else
+            save.WriteSaveFile();
+    }
+
     public void dispose() {
         //Dispose all levels
         for (int i = 0; i < levels.size; i++) {
@@ -145,17 +182,17 @@ public final class Engine {
         System.gc();
     }
 
-    public void resize(int width, int height) {
+    public void render() {
         try {
-            currentLevel.inResponseToEngine_resize(width, height);
+            currentLevel.inResponseToEngine_render(Gdx.graphics.getDeltaTime());
         } catch (Exception e) {
             log.error(e.getMessage());
         }
     }
 
-    public void render() {
+    public void resize(int width, int height) {
         try {
-            currentLevel.inResponseToEngine_render(Gdx.graphics.getDeltaTime());
+            currentLevel.inResponseToEngine_resize(width, height);
         } catch (Exception e) {
             log.error(e.getMessage());
         }
@@ -196,8 +233,8 @@ public final class Engine {
         return mute;
     }
 
-    public void setMute(boolean mute) {
-        mute = mute;
+    public void setMute(boolean _mute) {
+        mute = _mute;
     }
 
     //endregion
@@ -224,5 +261,4 @@ public final class Engine {
         return (frameRate == 0 ? 60 : frameRate);
     }
     //endregion
-
 }

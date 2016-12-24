@@ -10,8 +10,6 @@ import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
-import com.badlogic.gdx.math.Vector2;
-import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.physics.box2d.Body;
 import com.badlogic.gdx.physics.box2d.World;
 import com.badlogic.gdx.scenes.scene2d.Stage;
@@ -36,6 +34,8 @@ import box2dLight.RayHandler;
  *
  */
 public abstract class LevelBase implements GestureListener {
+
+    Engine engine = Engine.getInstance();
 
     private ArrayList<Delegate> delegates = new ArrayList<Delegate>();
 
@@ -114,7 +114,7 @@ public abstract class LevelBase implements GestureListener {
     }
 
     private void SetupPhysicsWorld() {
-        world = new World(Engine.getInstance().getConfig().gravity, false);//Engine.getCurrentLevel().getMap().params.gravity
+        world = new World(engine.getConfig().gravity, false);//Engine.getCurrentLevel().getMap().params.gravity
         world.setContactListener(new CollisionListener());
     }
 
@@ -189,14 +189,14 @@ public abstract class LevelBase implements GestureListener {
         // a viewport manages the method the camera uses to map any point
         // in world space to camera space.
         //main viewport
-        viewport = new ExtendViewport(Engine.getInstance().WindowWidth(), Engine.getInstance().WindowHeight(), camera);
+        viewport = new ExtendViewport(engine.WindowWidth(), engine.WindowHeight(), camera);
         viewport.apply(true);
-        viewport.update(Engine.getInstance().WindowWidth(), Engine.getInstance().WindowHeight());
+        viewport.update(engine.WindowWidth(), engine.WindowHeight());
     }
 
     private void SetupUIStage() {
 
-        uiStage = new Stage(new ExtendViewport(Engine.getInstance().WindowWidth(), Engine.getInstance().WindowHeight()));
+        uiStage = new Stage(new ExtendViewport(engine.WindowWidth(), engine.WindowHeight()));
     }
 
     public OrthographicCamera getCamera() {
@@ -214,8 +214,8 @@ public abstract class LevelBase implements GestureListener {
     private void DrawProgressCircle(float progress) {
         shapeRenderer.setProjectionMatrix(camera.combined);
         //Circle position and size
-        float x = Engine.getInstance().WindowWidth() / 2;
-        float y = Engine.getInstance().WindowHeight() / 2;
+        float x = engine.WindowWidth() / 2;
+        float y = engine.WindowHeight() / 2;
         float r = 30;
         //Draw backGround circle
         shapeRenderer.setColor(Color.GRAY);
@@ -415,7 +415,7 @@ public abstract class LevelBase implements GestureListener {
 
         //render Box2D lights
         if (enableLights) {
-            rayHandler.setCombinedMatrix(camera.combined.cpy().scale(Engine.getInstance().getConfig().ppm, Engine.getInstance().getConfig().ppm, 1f));
+            rayHandler.setCombinedMatrix(camera.combined.cpy().scale(engine.getConfig().ppm, engine.getConfig().ppm, 1f));
             rayHandler.updateAndRender();
         }
 

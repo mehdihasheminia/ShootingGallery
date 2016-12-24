@@ -22,6 +22,11 @@ import com.bornaapp.borna2d.physics.CollisionEvent;
  * Created by Mehdi on 12/19/2016.
  */
 public class Crosshair {
+    final public int maxBullets = 5;
+    public int remainingBullets = 5;
+    public int reloadDuration = 3;
+    public boolean isReloading = false;
+
     public boolean bulletIsTravelling = false;
     Timer shotTimer = new Timer();
     float shotDuration = 0.1f;
@@ -62,7 +67,8 @@ public class Crosshair {
         bodyComp = ashleyEngine.createComponent(BodyComponent.class);
         bodyComp.Init(BodyDef.BodyType.DynamicBody, new CircleDef(5f), x, y, true, true, new CollisionEvent(this) {
             @Override
-            public void onBeginContact(Object collidedObject, Body collidedBody, Fixture collidedFixture) {}
+            public void onBeginContact(Object collidedObject, Body collidedBody, Fixture collidedFixture) {
+            }
         });
         bodyComp.body.setGravityScale(0);
         entity.add(bodyComp);
@@ -88,5 +94,24 @@ public class Crosshair {
                 animComp.setPlayStatus(PlayStatus.Stopped);
             }
         }, shotDuration);
+
+        if (!isReloading)
+            remainingBullets--;
+
+        Engine.getInstance().getCurrentLevel().ExecuteDelegate("Shoot");
+        if (remainingBullets < 1) {
+            remainingBullets = 0;
+            bulletIsTravelling = false;
+            isReloading = true;
+            Timer reloadTimer = new Timer();
+            reloadTimer.scheduleTask(new Timer.Task() {
+
+                @Override
+                public void run() {
+                    remainingBullets = maxBullets;
+                    isReloading = false;
+                }
+            }, reloadDuration);
+        }
     }
 }

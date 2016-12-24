@@ -22,6 +22,8 @@ import com.bornaapp.borna2d.physics.BoxDef;
  */
 public class Rifle {
 
+    public int remainingBullet = 5;
+
     private TextureAtlasComponent texComp;
 
     private AnimationComponent animComp;

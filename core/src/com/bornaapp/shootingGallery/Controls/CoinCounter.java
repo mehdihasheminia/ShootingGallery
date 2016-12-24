@@ -19,6 +19,8 @@ public class CoinCounter {
     Table table = new Table();
     Label label;
 
+    public float margin = 10f;
+
     public CoinCounter() {
     }
 
@@ -40,7 +42,6 @@ public class CoinCounter {
         table.setWidth(100);
         table.setHeight(36);
         table.setTransform(true);
-        float margin = 10f;
         float x = margin;
         float y = Engine.getInstance().WindowHeight() - table.getHeight() - margin;
         table.setPosition((x > 0 ? x : 0), (y > 0 ? y : 0));

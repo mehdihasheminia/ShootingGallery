@@ -5,7 +5,12 @@ import com.badlogic.gdx.Gdx;
 import com.bornaapp.borna2d.game.levels.Engine;
 
 public abstract class AppListener implements ApplicationListener {
-    //nothing in constructor!!! as Gdx is not initialized yet.
+
+    Engine engine = Engine.getInstance();
+
+    public AppListener(){
+        //nothing in constructor!!! as Gdx is not initialized yet.
+    }
 
     protected abstract void setLevel();
 
@@ -14,7 +19,7 @@ public abstract class AppListener implements ApplicationListener {
      */
     @Override
     public void create() {
-        Engine.getInstance().Init();
+        engine.create();
         setLevel();
     }
 
@@ -23,8 +28,8 @@ public abstract class AppListener implements ApplicationListener {
      */
     @Override
     public void dispose() {
-        Engine.getInstance().dispose();
-        Gdx.app.exit();//<----todo: should always be called! here or somewhere else?
+        engine.dispose();
+        Gdx.app.exit();
     }
 
     /**
@@ -32,7 +37,7 @@ public abstract class AppListener implements ApplicationListener {
      */
     @Override
     public void render() {
-        Engine.getInstance().render();
+        engine.render();
     }
 
     /**
@@ -44,7 +49,7 @@ public abstract class AppListener implements ApplicationListener {
      */
     @Override
     public void resize(int width, int height) {
-        Engine.getInstance().resize(width, height);
+        engine.resize(width, height);
     }
 
     /**
@@ -53,7 +58,7 @@ public abstract class AppListener implements ApplicationListener {
      */
     @Override
     public void pause() {
-        Engine.getInstance().pause();
+        engine.pause();
     }
 
     /**
@@ -61,6 +66,6 @@ public abstract class AppListener implements ApplicationListener {
      */
     @Override
     public void resume() {
-        Engine.getInstance().resume();
+        engine.resume();
     }
 }

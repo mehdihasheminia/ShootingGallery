@@ -91,6 +91,10 @@ public class log {
         text(getCurrentLevelName() + "; " + getCurrentMethodName() + ": " + message, ANSI_RED);
     }
 
+    public static void error(boolean value) {
+        error(Boolean.toString(value));
+    }
+
     public static void error(float value) {
         error(Float.toString(value));
     }
@@ -109,6 +113,10 @@ public class log {
         text(getCurrentLevelName() + "; " + getCurrentMethodName() + ": " + message, ANSI_BLUE);
     }
 
+    public static void info(boolean value) {
+        info(Boolean.toString(value));
+    }
+
     public static void info(float value) {
         info(Float.toString(value));
     }
@@ -125,6 +133,10 @@ public class log {
         if (getEngineLogLevel() == LogLevel.LOG_ERROR || getEngineLogLevel() == LogLevel.LOG_INFO || getEngineLogLevel() == LogLevel.LOG_NONE)
             return;
         text(getCurrentLevelName() + "; " + getCurrentMethodName() + ": " + message, ANSI_BLACK);
+    }
+
+    public static void debug(boolean value) {
+        debug(Boolean.toString(value));
     }
 
     public static void debug(float value) {
