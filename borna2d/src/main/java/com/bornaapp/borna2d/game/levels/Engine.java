@@ -17,13 +17,15 @@ public final class Engine {
 
     private final static Engine instance = new Engine();
 
+    public Progress progress = new Progress();
+
     private EngineConfig engineConfig = new EngineConfig();
 
     private Array<LevelBase> levels = new Array<LevelBase>();
     private LevelBase currentLevel = null;
 
     private float masterVolume = 1.0f;
-    private boolean mute = false;
+    public boolean mute = false;
 
     //region Singleton construction & instantiation
 
@@ -36,21 +38,22 @@ public final class Engine {
 
     //endregion
 
-    //region Load/save game data and configurations
-    public class Save {
+    //region Load/save game Progress
+    public class Progress {
 
-        private final String saveFilepath = "save.json";
+        private final String saveFilePath = "save.json";
         private SlotCollection slotCollection = new SlotCollection();
 
-        public boolean fileExist(){
-            return Gdx.files.internal(saveFilepath).exists();
+        public boolean fileExist() {
+            return Gdx.files.internal(saveFilePath).exists();
         }
 
-        public void AddSaveSlot(Slot slot) {
-            slotCollection.slots.add(slot);
+        public void AddSlot(Slot slot) {
+            if (!SlotExits(slot.name))
+                slotCollection.slots.add(slot);
         }
 
-        public boolean SaveSlotExits(String _name) {
+        public boolean SlotExits(String _name) {
             for (Slot s : slotCollection.slots) {
                 if (s.name.equals(_name))
                     return true;
@@ -58,17 +61,9 @@ public final class Engine {
             return false;
         }
 
-        public Slot getSaveSlot(String _name) {
-            for (Slot s : slotCollection.slots) {
-                if (s.name.equals(_name))
-                    return s;
-            }
-            return null;
-        }
-
-        public SlotCollection ReadSaveFile() {
+        public SlotCollection Load() {
             try {
-                FileHandle file = Gdx.files.internal(saveFilepath);
+                FileHandle file = Gdx.files.internal(saveFilePath);
                 Json json = new Json();
                 slotCollection = json.fromJson(SlotCollection.class, file);
                 return slotCollection;
@@ -78,13 +73,12 @@ public final class Engine {
             }
         }
 
-        public void WriteSaveFile() {
+        public void Save() {
             try {
                 Json json = new Json();
-
                 json.setUsePrototypes(false);
                 json.setOutputType(JsonWriter.OutputType.json);
-                FileHandle file = new FileHandle(saveFilepath);
+                FileHandle file = new FileHandle(saveFilePath);
                 file.writeString(json.prettyPrint(slotCollection), false);
                 //confirmation message
                 System.out.println(file + " : created");
@@ -93,12 +87,9 @@ public final class Engine {
             }
         }
     }
-    public Save save = new Save();
-
-
     //endregion
 
-    //region data and configurations
+    //region Engine configurations
 
     private void LoadEngineConfigFromFile() {
         engineConfig = null;
@@ -120,37 +111,35 @@ public final class Engine {
     //region level manager
 
     public void setLevel(LevelBase newLevel, boolean replacePrevious) {
-        //
+
         for (int i = 0; i < levels.size; i++) {
-            LevelBase l = levels.get(i);
-            if (newLevel.getClass().getName().equals(l.getClass().getName())) {
-                //level is previously loaded
+            LevelBase level = levels.get(i);
+            //Check if level is previously loaded
+            if (newLevel.getClass().getName().equals(level.getClass().getName())) {
+
                 if (replacePrevious) {
-                    //replace previous instance of this class
-                    l.inResponseToEngine_dispose();
+                    //remove currently available instance of this class to start a fresh instance
+                    level.inResponseToEngine_dispose();
                     levels.removeIndex(i);
                 } else {
-                    currentLevel = l;
+                    //cancel newLevel & keep previous instance
                     newLevel.inResponseToEngine_dispose();
+                    currentLevel = level;
                     return;
                 }
-                //cancel new level & load previous one
             }
         }
         levels.add(newLevel);
         currentLevel = newLevel;
         currentLevel.inResponseToEngine_create();
         currentLevel.inResponseToEngine_resume();
-        currentLevel.inResponseToEngine_resize(Gdx.graphics.getWidth(), Gdx.graphics.getHeight());//todo: Engine.width
+        currentLevel.inResponseToEngine_resize(WindowWidth(), WindowHeight());
     }
 
     public void setLevel(LevelBase newLevel) {
         setLevel(newLevel, true);
     }
 
-    /**
-     * @return
-     */
     public LevelBase getCurrentLevel() {
         return currentLevel;
     }
@@ -163,23 +152,31 @@ public final class Engine {
 
         LoadEngineConfigFromFile();
 
-        if (save.fileExist())
-            save.ReadSaveFile();
-        else
-            save.WriteSaveFile();
+        try {
+            if (progress.fileExist())
+                progress.Load();
+            else
+                progress.Save();
+        } catch (Exception e) {
+            log.error(e.getMessage());
+        }
     }
 
     public void dispose() {
-        //Dispose all levels
-        for (int i = 0; i < levels.size; i++) {
-            LevelBase l = levels.get(i);
-            if (l != null) {
-                l.inResponseToEngine_dispose();
+        //Dispose data of each level
+        for (LevelBase level : levels) {
+            try {
+                level.inResponseToEngine_dispose();
+            } catch (Exception e) {
+                log.error(e.getMessage());
             }
         }
-        levels.clear();
-        //collect all garbage memory
-        System.gc();
+        //clear list of levels
+        try {
+            levels.clear();
+        } catch (Exception e) {
+            log.error(e.getMessage());
+        }
     }
 
     public void render() {
@@ -215,7 +212,7 @@ public final class Engine {
     }
     //endregion
 
-    //region music & sound Volume control
+    //region Master Volume control
 
     public float getMasterVolume() {
         return masterVolume;
@@ -227,14 +224,6 @@ public final class Engine {
         else if (value < 0.0f)
             value = 0.0f;
         masterVolume = value;
-    }
-
-    public boolean isMute() {
-        return mute;
-    }
-
-    public void setMute(boolean _mute) {
-        mute = _mute;
     }
 
     //endregion
@@ -258,7 +247,8 @@ public final class Engine {
 
     public int frameRate() {
         int frameRate = Gdx.graphics.getFramesPerSecond();
-        return (frameRate == 0 ? 60 : frameRate);
+//        return (frameRate == 0 ? 60 : frameRate);
+        return frameRate;
     }
     //endregion
 }

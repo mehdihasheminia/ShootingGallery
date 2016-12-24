@@ -329,6 +329,7 @@ public abstract class LevelBase implements GestureListener {
             world.dispose();
             assetManager.dispose();
             shapeRenderer.dispose();
+            //
             System.gc();
             created = false;
         }

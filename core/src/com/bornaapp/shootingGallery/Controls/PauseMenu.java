@@ -44,7 +44,7 @@ public class PauseMenu {
         volumeBtn.addListener(new ChangeListener() {
             @Override
             public void changed(ChangeEvent event, Actor actor) {
-                Engine.getInstance().setMute(!Engine.getInstance().isMute());
+                Engine.getInstance().mute = !Engine.getInstance().mute;
             }
         });
 

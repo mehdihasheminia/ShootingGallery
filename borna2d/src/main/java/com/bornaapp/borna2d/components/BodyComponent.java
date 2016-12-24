@@ -12,7 +12,6 @@ import com.badlogic.gdx.physics.box2d.FixtureDef;
 import com.badlogic.gdx.physics.box2d.PolygonShape;
 import com.badlogic.gdx.physics.box2d.Shape;
 import com.bornaapp.borna2d.game.levels.Engine;
-import com.bornaapp.borna2d.log;
 import com.bornaapp.borna2d.physics.BoxDef;
 import com.bornaapp.borna2d.physics.CapsuleDef;
 import com.bornaapp.borna2d.physics.CircleDef;

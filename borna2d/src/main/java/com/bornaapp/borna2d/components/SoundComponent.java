@@ -36,7 +36,7 @@ public class SoundComponent extends Component {
 
     public void Play() {
         float volume = Engine.getInstance().getMasterVolume() * this.volume;
-        if (Engine.getInstance().isMute())
+        if (Engine.getInstance().mute)
             volume = 0.0f;
 
         if (soundID == -1) {
