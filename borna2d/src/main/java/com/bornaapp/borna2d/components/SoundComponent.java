@@ -29,7 +29,7 @@ public class SoundComponent extends Component {
     }
 
     public void Init(String _path, boolean _is3D, boolean _looping) {
-        sound = Engine.getInstance().getCurrentLevel().getAssetManager().getSound(_path);
+        sound = Engine.getInstance().getCurrentLevel().assets.getSound(_path);
         is3D = _is3D;
         looping = _looping;
     }

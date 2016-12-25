@@ -21,7 +21,7 @@ public class ParticleComponent extends Component {
     private ParticleComponent(){};
 
     public void Init(String filePath, float x, float y){
-        particleEffect = new ParticleEffect(Engine.getInstance().getCurrentLevel().getAssetManager().getParticleEffect(filePath));//<---todo: assets get cleaned on exit? I mean because of 'new' !
+        particleEffect =Engine.getInstance().getCurrentLevel().assets.getParticleEffect(filePath);
         particleEffect.start();
         particleEffect.setPosition(x, y);
     }

@@ -24,7 +24,7 @@ public class LevelCompleteMenu {
 
         //------------------------ Continue Button -----------------------------------
         Skin continueBtnSkin = new Skin();
-        continueBtnSkin.addRegions(Engine.getInstance().getCurrentLevel().getAssetManager().getTextureAtlas("ContinueBtn.atlas"));
+        continueBtnSkin.addRegions(Engine.getInstance().getCurrentLevel().assets.getTextureAtlas("ContinueBtn.atlas"));
 
         ImageButton continueBtn = new ImageButton(continueBtnSkin.getDrawable("01Normal"), continueBtnSkin.getDrawable("02Clicked"));
 
@@ -37,7 +37,7 @@ public class LevelCompleteMenu {
 
         //------------------------ Restart Button -----------------------------------
         Skin restartBtnSkin = new Skin();
-        restartBtnSkin.addRegions(Engine.getInstance().getCurrentLevel().getAssetManager().getTextureAtlas("restartBtn.atlas"));
+        restartBtnSkin.addRegions(Engine.getInstance().getCurrentLevel().assets.getTextureAtlas("restartBtn.atlas"));
 
         ImageButton restartBtn = new ImageButton(restartBtnSkin.getDrawable("01RestartNormal"), restartBtnSkin.getDrawable("02RestartClicked"));
 
@@ -50,7 +50,7 @@ public class LevelCompleteMenu {
 
         //------------------------ Exit Button -----------------------------------
         Skin exitBtnSkin = new Skin();
-        exitBtnSkin.addRegions(Engine.getInstance().getCurrentLevel().getAssetManager().getTextureAtlas("exitBtn.atlas"));
+        exitBtnSkin.addRegions(Engine.getInstance().getCurrentLevel().assets.getTextureAtlas("exitBtn.atlas"));
 
         ImageButton exitBtn = new ImageButton(exitBtnSkin.getDrawable("01exitNormal"), exitBtnSkin.getDrawable("02exitClicked"));
 
@@ -66,7 +66,7 @@ public class LevelCompleteMenu {
         Engine.getInstance().getCurrentLevel().uiStage.addActor(table);
 //        table.debugAll();
 
-        final Drawable tblBackground = new TextureRegionDrawable(new TextureRegion(Engine.getInstance().getCurrentLevel().getAssetManager().getTexture("levelCompleteTable.png")));
+        final Drawable tblBackground = new TextureRegionDrawable(new TextureRegion(Engine.getInstance().getCurrentLevel().assets.getTexture("levelCompleteTable.png")));
         table.setBackground(tblBackground);
 
         table.setWidth(280);

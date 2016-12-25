@@ -24,53 +24,8 @@ public class Assets {
     private AssetManifest manifest;
     private final AssetManager assetManager = new AssetManager();
 
-    //region Loading methods
-
-    /**
-     * Loads external assets from "assetManifest.json" all at once
-     *
-     * @param manifestPath path to asset manifest file
-     */
-    public void loadAll(String manifestPath) {
-
-        LoadManifest(manifestPath);
-
-        PopulateLoadingQueue();
-
-        //AssetManager begins loading all listed assets...
-        try {
-            while (!assetManager.update()) {
-                assetManager.getProgress();
-            }
-        } catch (Exception e) {
-            log.error("Some assets failed to Load: " + e.getMessage());
-        }
-    }
-
-    /**
-     * Loads external assets from "assetManifest.json" progressively
-     *
-     * @param manifestPath path to asset manifest file
-     * @return true if loading is in progress & false if finished or failed
-     */
-    public boolean loadByStep(String manifestPath) {
-
-        boolean success = LoadManifest(manifestPath);
-        if (!success)
-            return false;
-
-        PopulateLoadingQueue();
-
-        //AssetManager begins loading one Asset on each call...
-        try {
-            return !assetManager.update();
-        } catch (Exception e) {
-            log.error("Some assets failed to Load: " + e.getMessage());
-            return false;
-        }
-    }
-
-    private boolean LoadManifest(String manifestPath) {
+    //region Manifest methods
+    private boolean ReadAssetManifest(String manifestPath) {
 
         if (!manifestPath.toLowerCase().endsWith(".json"))
             return false;
@@ -87,7 +42,7 @@ public class Assets {
         }
     }
 
-    private void PopulateLoadingQueue() {
+    private void ListManifestItemsInLoadingQueue() {
 
         for (String filePath : manifest.textures)
             assetManager.load(filePath, TextureAtlas.class);
@@ -111,7 +66,59 @@ public class Assets {
     }
     //endregion
 
-    //region get Assets
+    //region Loading methods
+
+    /**
+     * Loads external assets from "assetManifest.json" all at once
+     *
+     * @param manifestPath path to asset manifest file
+     */
+    public void LoadAll(String manifestPath) {
+
+        ReadAssetManifest(manifestPath);
+
+        ListManifestItemsInLoadingQueue();
+
+        //AssetManager begins loading all listed assets...
+        try {
+            while (!assetManager.update()) {
+                assetManager.getProgress();
+            }
+        } catch (Exception e) {
+            log.error("Some assets failed to Load: " + e.getMessage());
+        }
+    }
+
+    /**
+     * Loads external assets from "assetManifest.json" progressively
+     *
+     * @param manifestPath path to asset manifest file
+     * @return true if loading is in progress & false if finished or failed
+     */
+    public boolean LoadByStep(String manifestPath) {
+
+        boolean success = ReadAssetManifest(manifestPath);
+        if (!success)
+            return false;
+
+        ListManifestItemsInLoadingQueue();
+
+        //AssetManager begins loading one Asset on each call...
+        try {
+            return !assetManager.update();
+        } catch (Exception e) {
+            log.error("Some assets failed to Load: " + e.getMessage());
+            return false;
+        }
+    }
+
+    public float getProgress() {
+        return assetManager.getProgress();
+    }
+
+    //endregion
+
+    //region Methods to retreive an Asset
     public TextureAtlas getTextureAtlas(String name) {
         TextureAtlas textureAtlas = null;
         name = "textures/" + name;
@@ -188,12 +195,6 @@ public class Assets {
             log.error("bitmap-font not found: " + name);
 
         return bitmapFont;
-    }
-    //endregion
-
-    //region Utilities
-    public float getProgress() {
-        return assetManager.getProgress();
     }
     //endregion
 

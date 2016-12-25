@@ -5,6 +5,7 @@ import com.badlogic.gdx.files.FileHandle;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Json;
 import com.badlogic.gdx.utils.JsonWriter;
+import com.bornaapp.borna2d.asset.Assets;
 import com.bornaapp.borna2d.log;
 
 /**
@@ -17,9 +18,9 @@ public final class Engine {
 
     private final static Engine instance = new Engine();
 
-    public Progress progress = new Progress();
-
     private EngineConfig engineConfig = new EngineConfig();
+
+    public Progress progress = new Progress();
 
     private Array<LevelBase> levels = new Array<LevelBase>();
     private LevelBase currentLevel = null;
@@ -34,6 +35,25 @@ public final class Engine {
 
     public static Engine getInstance() {
         return instance;
+    }
+
+    //endregion
+
+    //region Engine configurations
+
+    private void LoadEngineConfigFromFile() {
+        engineConfig = null;
+        try {
+            FileHandle file = Gdx.files.internal("engineConf.json");
+            Json json = new Json();
+            engineConfig = json.fromJson(EngineConfig.class, file);
+        } catch (Exception e) {
+            log.error(e.getMessage());
+        }
+    }
+
+    public EngineConfig getConfig() {
+        return engineConfig;
     }
 
     //endregion
@@ -87,25 +107,6 @@ public final class Engine {
             }
         }
     }
-    //endregion
-
-    //region Engine configurations
-
-    private void LoadEngineConfigFromFile() {
-        engineConfig = null;
-        try {
-            FileHandle file = Gdx.files.internal("engineConf.json");
-            Json json = new Json();
-            engineConfig = json.fromJson(EngineConfig.class, file);
-        } catch (Exception e) {
-            log.error(e.getMessage());
-        }
-    }
-
-    public EngineConfig getConfig() {
-        return engineConfig;
-    }
-
     //endregion
 
     //region level manager

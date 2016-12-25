@@ -35,16 +35,16 @@ import box2dLight.RayHandler;
  */
 public abstract class LevelBase implements GestureListener {
 
-    Engine engine = Engine.getInstance();
+    protected Engine engine = Engine.getInstance();
+
+    private String assetManifestPath;
+    public Assets assets = new Assets();
+    public boolean loadProgressively = true;
 
     private ArrayList<Delegate> delegates = new ArrayList<Delegate>();
 
     private boolean created = false;
     public boolean paused = false;
-
-    private Assets assetManager = new Assets();
-    private String assetManifestPath;
-    public boolean loadProgressively = true;
 
     public Color backColor = Color.DARK_GRAY;
     private SpriteBatch batch = new SpriteBatch();
@@ -85,19 +85,15 @@ public abstract class LevelBase implements GestureListener {
 
     //region Assets
 
-    public Assets getAssetManager() {
-        return assetManager;
-    }
-
-    private boolean LoadAssets(boolean progressiveLoading) {
+    private boolean LoadAssets( boolean progressiveLoading) {
         try {
             if (!progressiveLoading) {
 
-                assetManager.loadAll(assetManifestPath);
+                assets.LoadAll(assetManifestPath);
                 return false;
 
             } else {
-                return assetManager.loadByStep(assetManifestPath);
+                return assets.LoadByStep(assetManifestPath);
             }
         } catch (Exception e) {
             log.error(e.getMessage());
@@ -266,13 +262,13 @@ public abstract class LevelBase implements GestureListener {
     //endregion
 
     //region Delegates
-    public void AddDelegate(Delegate _delegate){
+    public void AddDelegate(Delegate _delegate) {
         delegates.add(_delegate);
     }
 
-    public void ExecuteDelegate(String _name){
-        for(Delegate delegate:delegates){
-            if(delegate.name.equals(_name))
+    public void ExecuteDelegate(String _name) {
+        for (Delegate delegate : delegates) {
+            if (delegate.name.equals(_name))
                 delegate.Execute();
         }
     }
@@ -289,7 +285,7 @@ public abstract class LevelBase implements GestureListener {
         SetupUIStage();
 
         //Loading common resources
-        assetManager.loadAll("assetManifest_common.json");
+        assets.LoadAll("assetManifest_common.json");
 
         //Loading level-specific resources
         boolean isLoadingInProgress = LoadAssets(loadProgressively);
@@ -327,7 +323,7 @@ public abstract class LevelBase implements GestureListener {
             debugRenderer.dispose();
             rayHandler.dispose();
             world.dispose();
-            assetManager.dispose();
+            assets.dispose();
             shapeRenderer.dispose();
             //
             System.gc();
@@ -348,7 +344,7 @@ public abstract class LevelBase implements GestureListener {
 
         //continue loading assets if any
         if (!created) {
-            DrawProgressCircle(assetManager.getProgress());
+            DrawProgressCircle(assets.getProgress());
             inResponseToEngine_create();
             return;
         }

@@ -11,7 +11,7 @@ public class OrthogonalMap extends Map {
 
     @Override
     protected void Init(String filePath) {
-        tiledMap = Engine.getInstance().getCurrentLevel().getAssetManager().getTiledMap(filePath);
+        tiledMap = Engine.getInstance().getCurrentLevel().assets.getTiledMap(filePath);
         tiledMapRenderer = new OrthogonalTiledMapRenderer(tiledMap, Engine.getInstance().getCurrentLevel().getBatch());
     }
 }

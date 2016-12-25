@@ -19,7 +19,7 @@ public class TextureAtlasComponent extends DrawingComponent {
     private TextureAtlasComponent() {}
 
     public void Init(String _Path, float _scale) {
-        textureAtlas = Engine.getInstance().getCurrentLevel().getAssetManager().getTextureAtlas(_Path);
+        textureAtlas = Engine.getInstance().getCurrentLevel().assets.getTextureAtlas(_Path);
         super.scale = _scale;
     }
 

@@ -15,7 +15,7 @@ public class Background {
     private boolean wrap;
 
     public Background(String _Path, boolean _wrap) {
-        texture = Engine.getInstance().getCurrentLevel().getAssetManager().getTexture(_Path);
+        texture = Engine.getInstance().getCurrentLevel().assets.getTexture(_Path);
         texture.setWrap(TextureWrap.Repeat, TextureWrap.Repeat);
         wrap = _wrap;
     }

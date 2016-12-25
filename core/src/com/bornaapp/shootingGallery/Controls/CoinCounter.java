@@ -36,7 +36,7 @@ public class CoinCounter {
         //---------------------------Layout Table ------------------------------
         Engine.getInstance().getCurrentLevel().uiStage.addActor(table);
 
-        final Drawable tblBackground = new TextureRegionDrawable(new TextureRegion(Engine.getInstance().getCurrentLevel().getAssetManager().getTexture("coinBox.png")));
+        final Drawable tblBackground = new TextureRegionDrawable(new TextureRegion(Engine.getInstance().getCurrentLevel().assets.getTexture("coinBox.png")));
         table.setBackground(tblBackground);
 
         table.setWidth(100);

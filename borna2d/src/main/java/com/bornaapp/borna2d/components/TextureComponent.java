@@ -19,7 +19,7 @@ public class TextureComponent extends DrawingComponent {
 
     @Override
     public void Init(String _Path, float _scale){
-        texture = Engine.getInstance().getCurrentLevel().getAssetManager().getTexture(_Path);
+        texture = Engine.getInstance().getCurrentLevel().assets.getTexture(_Path);
         super.scale = _scale;
     }
     //endregion

@@ -24,7 +24,7 @@ public class PauseMenu {
 
         //------------------------ Settings Button -----------------------------------
         Skin settingsBtnSkin = new Skin();
-        settingsBtnSkin.addRegions(Engine.getInstance().getCurrentLevel().getAssetManager().getTextureAtlas("settingsBtn.atlas"));
+        settingsBtnSkin.addRegions(Engine.getInstance().getCurrentLevel().assets.getTextureAtlas("settingsBtn.atlas"));
 
         ImageButton settingsBtn = new ImageButton(settingsBtnSkin.getDrawable("01settingsNormal"), settingsBtnSkin.getDrawable("02settingsClicked"));
 
@@ -37,7 +37,7 @@ public class PauseMenu {
 
         //------------------------ Volume Button -----------------------------------
         Skin volumeBtnSkin = new Skin();
-        volumeBtnSkin.addRegions(Engine.getInstance().getCurrentLevel().getAssetManager().getTextureAtlas("volumeBtn.atlas"));
+        volumeBtnSkin.addRegions(Engine.getInstance().getCurrentLevel().assets.getTextureAtlas("volumeBtn.atlas"));
 
         ImageButton volumeBtn = new ImageButton(volumeBtnSkin.getDrawable("01Volume_on"), volumeBtnSkin.getDrawable("02Volume_mute"), volumeBtnSkin.getDrawable("02Volume_mute"));
 
@@ -50,7 +50,7 @@ public class PauseMenu {
 
         //------------------------ Resume Button -----------------------------------
         Skin resumeBtnSkin = new Skin();
-        resumeBtnSkin.addRegions(Engine.getInstance().getCurrentLevel().getAssetManager().getTextureAtlas("resumeBtn.atlas"));
+        resumeBtnSkin.addRegions(Engine.getInstance().getCurrentLevel().assets.getTextureAtlas("resumeBtn.atlas"));
 
         ImageButton resumeBtn = new ImageButton(resumeBtnSkin.getDrawable("01ResumeNormal"), resumeBtnSkin.getDrawable("02ResumeClicked"));
 
@@ -63,7 +63,7 @@ public class PauseMenu {
 
         //------------------------ Restart Button -----------------------------------
         Skin restartBtnSkin = new Skin();
-        restartBtnSkin.addRegions(Engine.getInstance().getCurrentLevel().getAssetManager().getTextureAtlas("restartBtn.atlas"));
+        restartBtnSkin.addRegions(Engine.getInstance().getCurrentLevel().assets.getTextureAtlas("restartBtn.atlas"));
 
         ImageButton restartBtn = new ImageButton(restartBtnSkin.getDrawable("01RestartNormal"), restartBtnSkin.getDrawable("02RestartClicked"));
 
@@ -76,7 +76,7 @@ public class PauseMenu {
 
         //------------------------ Exit Button -----------------------------------
         Skin exitBtnSkin = new Skin();
-        exitBtnSkin.addRegions(Engine.getInstance().getCurrentLevel().getAssetManager().getTextureAtlas("exitBtn.atlas"));
+        exitBtnSkin.addRegions(Engine.getInstance().getCurrentLevel().assets.getTextureAtlas("exitBtn.atlas"));
 
         ImageButton exitBtn = new ImageButton(exitBtnSkin.getDrawable("01exitNormal"), exitBtnSkin.getDrawable("02exitClicked"));
 
@@ -92,7 +92,7 @@ public class PauseMenu {
         Engine.getInstance().getCurrentLevel().uiStage.addActor(table);
 //        table.debugAll();
 
-        final Drawable tblBackground = new TextureRegionDrawable(new TextureRegion(Engine.getInstance().getCurrentLevel().getAssetManager().getTexture("pauseTable.png")));
+        final Drawable tblBackground = new TextureRegionDrawable(new TextureRegion(Engine.getInstance().getCurrentLevel().assets.getTexture("pauseTable.png")));
         table.setBackground(tblBackground);
 
         table.setWidth(280);

@@ -24,12 +24,12 @@ public class LifeCounter {
     public void Init() {
 
         //------------------------ Image -----------------------------------
-        image = new Image(new TextureRegion(Engine.getInstance().getCurrentLevel().getAssetManager().getTexture("LifeBar.png")));
+        image = new Image(new TextureRegion(Engine.getInstance().getCurrentLevel().assets.getTexture("LifeBar.png")));
 
         //---------------------------Layout Table ------------------------------
         Engine.getInstance().getCurrentLevel().uiStage.addActor(table);
 
-        final Drawable tblBackground = new TextureRegionDrawable(new TextureRegion(Engine.getInstance().getCurrentLevel().getAssetManager().getTexture("LifeBox.png")));
+        final Drawable tblBackground = new TextureRegionDrawable(new TextureRegion(Engine.getInstance().getCurrentLevel().assets.getTexture("LifeBox.png")));
         table.setBackground(tblBackground);
 
         table.setWidth(120);

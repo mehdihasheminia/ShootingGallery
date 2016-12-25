@@ -23,7 +23,7 @@ public class GameoverMenu {
 
         //------------------------ Restart Button -----------------------------------
         Skin restartBtnSkin = new Skin();
-        restartBtnSkin.addRegions(Engine.getInstance().getCurrentLevel().getAssetManager().getTextureAtlas("restartBtn.atlas"));
+        restartBtnSkin.addRegions(Engine.getInstance().getCurrentLevel().assets.getTextureAtlas("restartBtn.atlas"));
 
         ImageButton restartBtn = new ImageButton(restartBtnSkin.getDrawable("01RestartNormal"), restartBtnSkin.getDrawable("02RestartClicked"));
 
@@ -36,7 +36,7 @@ public class GameoverMenu {
 
         //------------------------ Exit Button -----------------------------------
         Skin exitBtnSkin = new Skin();
-        exitBtnSkin.addRegions(Engine.getInstance().getCurrentLevel().getAssetManager().getTextureAtlas("exitBtn.atlas"));
+        exitBtnSkin.addRegions(Engine.getInstance().getCurrentLevel().assets.getTextureAtlas("exitBtn.atlas"));
 
         ImageButton exitBtn = new ImageButton(exitBtnSkin.getDrawable("01exitNormal"), exitBtnSkin.getDrawable("02exitClicked"));
 
@@ -52,7 +52,7 @@ public class GameoverMenu {
         Engine.getInstance().getCurrentLevel().uiStage.addActor(table);
 //        table.debugAll();
 
-        final Drawable tblBackground = new TextureRegionDrawable(new TextureRegion(Engine.getInstance().getCurrentLevel().getAssetManager().getTexture("gameoverTable.png")));
+        final Drawable tblBackground = new TextureRegionDrawable(new TextureRegion(Engine.getInstance().getCurrentLevel().assets.getTexture("gameoverTable.png")));
         table.setBackground(tblBackground);
 
         table.setWidth(280);

@@ -24,7 +24,7 @@ public class EntryMenu extends LevelBase {
 
         //------------------------ Play Button ------------------------------
         Skin playBtnSkin = new Skin();
-        playBtnSkin.addRegions(getAssetManager().getTextureAtlas("PlayBtn.atlas"));
+        playBtnSkin.addRegions(assets.getTextureAtlas("PlayBtn.atlas"));
 
         ImageButton playBtn = new ImageButton(playBtnSkin.getDrawable("01playNormal"), playBtnSkin.getDrawable("02playClicked"));
 
@@ -37,7 +37,7 @@ public class EntryMenu extends LevelBase {
 
         //------------------------ Settings Button -----------------------------------
         Skin settingsBtnSkin = new Skin();
-        settingsBtnSkin.addRegions(getAssetManager().getTextureAtlas("settingsBtn.atlas"));
+        settingsBtnSkin.addRegions(assets.getTextureAtlas("settingsBtn.atlas"));
 
         ImageButton settingsBtn = new ImageButton(settingsBtnSkin.getDrawable("01settingsNormal"), settingsBtnSkin.getDrawable("02settingsClicked"));
 
@@ -50,7 +50,7 @@ public class EntryMenu extends LevelBase {
 
         //---------------Share Button-----------------------------------
         Skin shareBtnSkin = new Skin();
-        shareBtnSkin.addRegions(getAssetManager().getTextureAtlas("shareBtn.atlas"));
+        shareBtnSkin.addRegions(assets.getTextureAtlas("shareBtn.atlas"));
 
         ImageButton shareBtn = new ImageButton(shareBtnSkin.getDrawable("01shareNormal"), shareBtnSkin.getDrawable("02shareClicked"));
 
@@ -101,12 +101,12 @@ public class EntryMenu extends LevelBase {
 
     @Override
     public void NextLevel() {
-        Engine.getInstance().setLevel(new L1());
+        engine.setLevel(new L1());
     }
 
     @Override
     public void RestartLevel() {
-        Engine.getInstance().setLevel(new EntryMenu());
+        engine.setLevel(new EntryMenu());
     }
 
     //region Gesture Overrided methods
