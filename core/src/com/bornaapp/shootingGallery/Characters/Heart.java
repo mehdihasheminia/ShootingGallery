@@ -20,6 +20,7 @@ import com.bornaapp.borna2d.physics.CollisionEvent;
  * Created by Mehdi on 12/6/2016.
  */
 public class Heart {
+
     private Entity entity;
     private TextureAtlasComponent texComp;
     private AnimationComponent animComp;

@@ -1,16 +1,24 @@
 package com.bornaapp.borna2d;
 
+import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Camera;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.Vector2;
+import com.badlogic.gdx.math.Vector3;
 import com.bornaapp.borna2d.game.levels.Engine;
 
 import java.util.ArrayList;
 import java.util.List;
 
 public class OnScreenDisplay implements iDispose {
+
+    Engine engine = Engine.getInstance();
+    SpriteBatch batch;
+    ShapeRenderer shapeRenderer;
+    Camera camera;
 
     private boolean f1 = false;
 
@@ -20,9 +28,17 @@ public class OnScreenDisplay implements iDispose {
     private BitmapFont font;
 
     public OnScreenDisplay() {
-        font = new BitmapFont();//Use LibGDX's default Arial font.
+    }
+
+    public void Init() {
+        //Use LibGDX's default Arial font.
+        font = new BitmapFont();
         font.setColor(Color.CYAN);
         populateF1List();
+
+        batch = engine.getCurrentLevel().getBatch();
+        shapeRenderer = engine.getCurrentLevel().getShapeRenderer();
+        camera = Engine.getInstance().getCurrentLevel().getCamera();
     }
 
     private class LogData {
@@ -60,33 +76,85 @@ public class OnScreenDisplay implements iDispose {
         logList.add(new LogData(title, value));
     }
 
-    public void render(SpriteBatch batch) {
+    private void DrawGrids(int pixel) {
 
-        float xMargin = 20f;
-        float yMargin = 20f;
-        float lineHeight = 20f;
+        //with and height of the container
+        float viewportWidth = camera.viewportWidth;
+        float viewportHeight = camera.viewportHeight;
 
-        Camera camera = Engine.getInstance().getCurrentLevel().getCamera();
+        shapeRenderer.setProjectionMatrix(camera.combined);
 
-        float x = xMargin - camera.viewportWidth / 2;
-        float y = yMargin - camera.viewportHeight / 2;
+        //Draw viewport Rect
+        shapeRenderer.setColor(Color.DARK_GRAY);
+        shapeRenderer.begin(ShapeRenderer.ShapeType.Line);
+        shapeRenderer.rect(0, 0, viewportWidth - 1, viewportHeight - 1);
+        shapeRenderer.end();
 
-        batch.setProjectionMatrix(camera.projection);
+        //Draw grids
+        shapeRenderer.setColor(Color.GRAY);
+        shapeRenderer.begin(ShapeRenderer.ShapeType.Line);
+
+        for (int x = 0; x < viewportWidth; x += pixel) {
+            shapeRenderer.line(x, 0, x, viewportHeight);
+        }
+
+        for (int y = 0; y < viewportHeight; y += pixel) {
+            shapeRenderer.line(0, y, viewportWidth, y);
+        }
+
+        shapeRenderer.end();
+    }
+
+    private void DrawMouseLocation() {
+        //convert mouse pointer coordinates from screen-space to world-space
+        Vector3 worldCoord = camera.unproject(new Vector3(Gdx.input.getX(), Gdx.input.getY(), 0));
+
+        //Draw grids
+        shapeRenderer.setColor(Color.BLACK);
+        shapeRenderer.begin(ShapeRenderer.ShapeType.Line);
+        shapeRenderer.line(worldCoord.x + 10, worldCoord.y, 0, worldCoord.y);
+        shapeRenderer.line(worldCoord.x, worldCoord.y + 10, worldCoord.x, 0);
+        shapeRenderer.end();
 
         if (!batch.isDrawing())
             batch.begin();
-        if (f1) {
-            for (String str : f1List) {
-                font.draw(batch, str, x, y);
-                y += lineHeight;
-            }
-        } else {
-            for (LogData data : logList) {
-                font.draw(batch, data.title + " : " + data.value, x, y);
-                y += lineHeight;
-            }
-        }
+
+        font.draw(batch, "( " + Integer.toString((int)worldCoord.x) + ", " + Integer.toString((int)worldCoord.y) + " )", worldCoord.x + 10, worldCoord.y + 10);
+
         batch.end();
+    }
+
+    public void render() {
+        try {
+
+            DrawMouseLocation();
+
+            float xMargin = 20f;
+            float yMargin = 20f;
+            float lineHeight = 20f;
+
+            float x = xMargin - camera.viewportWidth / 2;
+            float y = yMargin - camera.viewportHeight / 2;
+
+            batch.setProjectionMatrix(camera.projection);
+
+            if (!batch.isDrawing())
+                batch.begin();
+            if (f1) {
+                for (String str : f1List) {
+                    font.draw(batch, str, x, y);
+                    y += lineHeight;
+                }
+            } else {
+                for (LogData data : logList) {
+                    font.draw(batch, data.title + " : " + data.value, x, y);
+                    y += lineHeight;
+                }
+            }
+            batch.end();
+        } catch (Exception e) {
+            log.error(e.getMessage());
+        }
     }
 
     @Override

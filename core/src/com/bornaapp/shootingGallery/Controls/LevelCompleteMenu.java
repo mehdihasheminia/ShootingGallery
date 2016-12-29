@@ -72,8 +72,8 @@ public class LevelCompleteMenu {
         table.setWidth(280);
         table.setHeight(400);
         table.setTransform(true);
-        float x = (Engine.getInstance().WindowWidth() - table.getWidth()) / 2;
-        float y = (Engine.getInstance().WindowHeight() - table.getHeight()) / 2;
+        float x = (Engine.getInstance().ScreenWidth() - table.getWidth()) / 2;
+        float y = (Engine.getInstance().ScreenHeight() - table.getHeight()) / 2;
         table.setPosition((x > 0 ? x : 0), (y > 0 ? y : 0));
 
         //Adding buttons to Table

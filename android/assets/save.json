@@ -1,18 +1,3 @@
 {
-"slots": [
-	{
-		"class": "com.bornaapp.shootingGallery.Levels.TestSlot",
-		"name": "t1",
-		"score": 100,
-		"life": 1.025,
-		"warningMessage": "MOther F***ers!"
-	},
-	{
-		"class": "com.bornaapp.shootingGallery.Levels.TestSlot",
-		"name": "t2",
-		"score": -100,
-		"life": 8.37,
-		"warningMessage": "YOLO YOLO!"
-	}
-]
+"slots": []
 }

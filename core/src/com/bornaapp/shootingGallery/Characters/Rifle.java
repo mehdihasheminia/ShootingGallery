@@ -4,8 +4,6 @@ import com.badlogic.ashley.core.Entity;
 import com.badlogic.ashley.core.PooledEngine;
 import com.badlogic.gdx.graphics.g2d.Animation;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
-import com.badlogic.gdx.math.Vector2;
-import com.badlogic.gdx.physics.box2d.Body;
 import com.badlogic.gdx.physics.box2d.BodyDef;
 import com.badlogic.gdx.utils.Timer;
 import com.bornaapp.borna2d.PlayStatus;
@@ -68,7 +66,7 @@ public class Rifle {
         float x, y, w, h;
         w = 120f;
         h = 250f;
-        x = (Engine.getInstance().WindowWidth()-w)/2f;
+        x = (Engine.getInstance().ScreenWidth()-w)/2f;
         y = 0;
         bodyComp.Init(BodyDef.BodyType.DynamicBody, new BoxDef(w, h), x, y, true, true);
         bodyComp.body.setGravityScale(0);

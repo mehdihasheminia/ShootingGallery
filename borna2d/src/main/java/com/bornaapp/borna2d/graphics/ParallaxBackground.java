@@ -4,6 +4,7 @@ import com.badlogic.gdx.graphics.Camera;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.Vector2;
+import com.bornaapp.borna2d.game.levels.Engine;
 
 /**
  * Created by Mehdi on 11/27/2016.
@@ -25,7 +26,7 @@ public class ParallaxBackground {
         this.layers = layers;
         this.speed.set(speed);
         camera = new OrthographicCamera(width, height);
-        batch = new SpriteBatch();
+        batch = Engine.getInstance().getCurrentLevel().getBatch();
     }
 
     public void render(float delta){

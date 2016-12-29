@@ -99,6 +99,10 @@ public class log {
         error(Float.toString(value));
     }
 
+    public static void error(double value) {
+        error(Double.toString(value));
+    }
+
     public static void error(int value) {
         error(Integer.toString(value));
     }
@@ -119,6 +123,10 @@ public class log {
 
     public static void info(float value) {
         info(Float.toString(value));
+    }
+
+    public static void info(double value) {
+        info(Double.toString(value));
     }
 
     public static void info(int value) {
@@ -143,6 +151,10 @@ public class log {
         debug(Float.toString(value));
     }
 
+    public static void debug(double value) {
+        debug(Double.toString(value));
+    }
+
     public static void debug(int value) {
         debug(Integer.toString(value));
     }
@@ -151,5 +163,3 @@ public class log {
         debug("[" + Float.toString(value.x) + ", " + Float.toString(value.y) + "]");
     }
 }
-
-

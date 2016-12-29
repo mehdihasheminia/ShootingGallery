@@ -39,7 +39,7 @@ public class SoundSystem extends IteratingSystem {
 //                distance.sub(new Vector2(getX(entity), getY(entity)));
 //                //
 //                soundComp.volume = Math.min(soundComp.volumeDegradationDistance / (Math.max(distance.len(), 1f)), 1f);
-//                soundComp.pan = -distance.x / (Engine.WindowWidth() / 2);
+//                soundComp.pan = -distance.x / (Engine.ScreenWidth() / 2);
 //                //
 //                if (soundComp.pan > 1f)
 //                    soundComp.pan = 1f;

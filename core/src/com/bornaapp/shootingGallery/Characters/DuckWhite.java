@@ -38,7 +38,7 @@ public class DuckWhite extends Duck {
             headOffsetY = 45.0f;
             //
             linearVelocity = -1.0f;
-            startPosition = new Vector2(Engine.getInstance().WindowWidth(), LineY);
+            startPosition = new Vector2(Engine.getInstance().ScreenWidth(), LineY);
             missX = -100f;
         } else {
             texOffsetX = -3.0f; //negative of flipped offset about x-axis
@@ -57,7 +57,7 @@ public class DuckWhite extends Duck {
             //
             linearVelocity = 1.0f; //negative of flipped speed about x-axis
             startPosition = new Vector2(0.0f, LineY);
-            missX = Engine.getInstance().WindowWidth()+100f;
+            missX = Engine.getInstance().ScreenWidth()+100f;
         }
     }
 }

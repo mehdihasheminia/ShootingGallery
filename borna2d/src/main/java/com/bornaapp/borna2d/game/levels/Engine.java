@@ -5,7 +5,6 @@ import com.badlogic.gdx.files.FileHandle;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Json;
 import com.badlogic.gdx.utils.JsonWriter;
-import com.bornaapp.borna2d.asset.Assets;
 import com.bornaapp.borna2d.log;
 
 /**
@@ -120,11 +119,11 @@ public final class Engine {
 
                 if (replacePrevious) {
                     //remove currently available instance of this class to start a fresh instance
-                    level.inResponseToEngine_dispose();
+                    level.Dispose();
                     levels.removeIndex(i);
                 } else {
                     //cancel newLevel & keep previous instance
-                    newLevel.inResponseToEngine_dispose();
+                    newLevel.Dispose();
                     currentLevel = level;
                     return;
                 }
@@ -132,9 +131,9 @@ public final class Engine {
         }
         levels.add(newLevel);
         currentLevel = newLevel;
-        currentLevel.inResponseToEngine_create();
-        currentLevel.inResponseToEngine_resume();
-        currentLevel.inResponseToEngine_resize(WindowWidth(), WindowHeight());
+        currentLevel.Create();
+        currentLevel.SystemResume();
+        currentLevel.Resize(ScreenWidth(), ScreenHeight());
     }
 
     public void setLevel(LevelBase newLevel) {
@@ -167,7 +166,7 @@ public final class Engine {
         //Dispose data of each level
         for (LevelBase level : levels) {
             try {
-                level.inResponseToEngine_dispose();
+                level.Dispose();
             } catch (Exception e) {
                 log.error(e.getMessage());
             }
@@ -182,7 +181,7 @@ public final class Engine {
 
     public void render() {
         try {
-            currentLevel.inResponseToEngine_render(Gdx.graphics.getDeltaTime());
+            currentLevel.Render(Gdx.graphics.getDeltaTime());
         } catch (Exception e) {
             log.error(e.getMessage());
         }
@@ -190,7 +189,7 @@ public final class Engine {
 
     public void resize(int width, int height) {
         try {
-            currentLevel.inResponseToEngine_resize(width, height);
+            currentLevel.Resize(width, height);
         } catch (Exception e) {
             log.error(e.getMessage());
         }
@@ -198,7 +197,7 @@ public final class Engine {
 
     public void pause() {
         try {
-            currentLevel.inResponseToEngine_pause();
+            currentLevel.SystemPause();
         } catch (Exception e) {
             log.error(e.getMessage());
         }
@@ -206,7 +205,7 @@ public final class Engine {
 
     public void resume() {
         try {
-            currentLevel.inResponseToEngine_resume();
+            currentLevel.SystemResume();
         } catch (Exception e) {
             log.error(e.getMessage());
         }
@@ -230,19 +229,23 @@ public final class Engine {
     //endregion
 
     //region Utilities
-    public float getJavaHeap() {
-        return (Gdx.app.getJavaHeap() / 1048576);
+    public double getJavaHeap() {
+        // The heap memory is the memory allocated to the java process
+        // from bytes to MegaBytes by division to Math.pow(2.0, 20);
+        return ((double)Gdx.app.getJavaHeap() / 1048576d);
     }
 
-    public float getNativeHeap() {
-        return (Gdx.app.getNativeHeap() / 1048576);
+    public double getNativeHeap() {
+        // The native memory is the memory available to the OS
+        // from bytes to MegaBytes by division to Math.pow(2.0, 20);
+        return (Gdx.app.getNativeHeap() / 1048576d);
     }
 
-    public int WindowWidth() {
+    public int ScreenWidth() {
         return Gdx.graphics.getWidth();
     }
 
-    public int WindowHeight() {
+    public int ScreenHeight() {
         return Gdx.graphics.getHeight();
     }
 

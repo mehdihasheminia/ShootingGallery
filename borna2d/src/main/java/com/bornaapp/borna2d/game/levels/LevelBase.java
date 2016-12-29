@@ -10,6 +10,7 @@ import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.Body;
 import com.badlogic.gdx.physics.box2d.World;
 import com.badlogic.gdx.scenes.scene2d.Stage;
@@ -44,19 +45,22 @@ public abstract class LevelBase implements GestureListener {
     private ArrayList<Delegate> delegates = new ArrayList<Delegate>();
 
     private boolean created = false;
-    public boolean paused = false;
+    private boolean paused = false;
 
     public Color backColor = Color.DARK_GRAY;
-    private SpriteBatch batch = new SpriteBatch();
-    private ShapeRenderer shapeRenderer = new ShapeRenderer();
+    final private SpriteBatch batch = new SpriteBatch();
+    final private ShapeRenderer shapeRenderer = new ShapeRenderer();
+
+    public Background background;
+    public ParallaxBackground parallax;
+
+    private Map map = new OrthogonalMap();
 
     public Stage uiStage = new Stage();
     public boolean debugUI = false;
 
-    private Map map = new OrthogonalMap();
-
-    public Background background;
-    public ParallaxBackground parallax;
+    private OrthographicCamera camera;
+    private Viewport viewport;
 
     private World world;
     private ArrayList<Body> killList = new ArrayList<Body>();
@@ -65,9 +69,6 @@ public abstract class LevelBase implements GestureListener {
 
     private boolean enableLights = false;
     private RayHandler rayHandler;
-
-    private OrthographicCamera camera;
-    private Viewport viewport;
 
     InputMultiplexer multiplexer = new InputMultiplexer();
 
@@ -85,7 +86,7 @@ public abstract class LevelBase implements GestureListener {
 
     //region Assets
 
-    private boolean LoadAssets( boolean progressiveLoading) {
+    private boolean LoadAssets(boolean progressiveLoading) {
         try {
             if (!progressiveLoading) {
 
@@ -99,6 +100,69 @@ public abstract class LevelBase implements GestureListener {
             log.error(e.getMessage());
             return false;
         }
+    }
+
+    //endregion
+
+    //region Delegates
+    public void AddDelegate(Delegate _delegate) {
+        delegates.add(_delegate);
+    }
+
+    public void ExecuteDelegate(String _name) {
+        for (Delegate delegate : delegates) {
+            if (delegate.name.equals(_name))
+                delegate.Execute();
+        }
+    }
+    //endregion
+
+    //region Level Pause/Run states
+    public boolean isPaused() {
+        return paused;
+    }
+
+    public void Pause() {
+        paused = true;
+    }
+
+    public void Unpause() {
+        paused = false;
+    }
+    //endregion
+
+    //region Graphics and Rendering
+
+    public SpriteBatch getBatch() {
+        return batch;
+    }
+
+    public ShapeRenderer getShapeRenderer() {
+        return shapeRenderer;
+    }
+
+    private void ClearScreen() {
+        Gdx.gl.glClearColor(backColor.r, backColor.g, backColor.b, backColor.a);
+        Gdx.gl.glBlendFunc(GL20.GL_SRC_ALPHA, GL20.GL_ONE_MINUS_SRC_ALPHA);
+        Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
+    }
+
+    private void DrawProgressCircle(float progress) {
+        shapeRenderer.setProjectionMatrix(camera.combined);
+        //Circle position and size
+        float x = engine.ScreenWidth() / 2;
+        float y = engine.ScreenHeight() / 2;
+        float r = 30;
+        //Draw backGround circle
+        shapeRenderer.setColor(Color.GRAY);
+        shapeRenderer.begin(ShapeRenderer.ShapeType.Filled);
+        shapeRenderer.circle(x, y, r);
+        shapeRenderer.end();
+        //Draw foreGround arc
+        shapeRenderer.setColor(Color.LIGHT_GRAY);
+        shapeRenderer.begin(ShapeRenderer.ShapeType.Filled);
+        shapeRenderer.arc(x, y, r, 0, progress * 360);
+        shapeRenderer.end();
     }
 
     //endregion
@@ -182,47 +246,21 @@ public abstract class LevelBase implements GestureListener {
     }
 
     private void SetupViewport() {
-        // a viewport manages the method the camera uses to map any point
-        // in world space to camera space.
-        //main viewport
-        viewport = new ExtendViewport(engine.WindowWidth(), engine.WindowHeight(), camera);
+        // a viewport manages the method the camera uses to map any point in world space to camera space.
+        // As we resize the window, viewport width and height remains constant and scales the rendering content
+        // to match the new window Width and Height.
+        viewport = new ExtendViewport(engine.ScreenWidth(), engine.ScreenHeight(), camera);
         viewport.apply(true);
-        viewport.update(engine.WindowWidth(), engine.WindowHeight());
+        viewport.update(engine.ScreenWidth(), engine.ScreenHeight());
     }
 
     private void SetupUIStage() {
 
-        uiStage = new Stage(new ExtendViewport(engine.WindowWidth(), engine.WindowHeight()));
+        uiStage = new Stage(viewport);
     }
 
     public OrthographicCamera getCamera() {
         return camera;
-    }
-
-    //endregion
-
-    //region Graphics and Rendering
-
-    public SpriteBatch getBatch() {
-        return batch;
-    }
-
-    private void DrawProgressCircle(float progress) {
-        shapeRenderer.setProjectionMatrix(camera.combined);
-        //Circle position and size
-        float x = engine.WindowWidth() / 2;
-        float y = engine.WindowHeight() / 2;
-        float r = 30;
-        //Draw backGround circle
-        shapeRenderer.setColor(Color.GRAY);
-        shapeRenderer.begin(ShapeRenderer.ShapeType.Filled);
-        shapeRenderer.circle(x, y, r);
-        shapeRenderer.end();
-        //Draw foreGround arc
-        shapeRenderer.setColor(Color.LIGHT_GRAY);
-        shapeRenderer.begin(ShapeRenderer.ShapeType.Filled);
-        shapeRenderer.arc(x, y, r, 0, progress * 360);
-        shapeRenderer.end();
     }
 
     //endregion
@@ -232,28 +270,32 @@ public abstract class LevelBase implements GestureListener {
     public OnScreenDisplay osd = new OnScreenDisplay();
     //endregion
 
-    //region Abstract(Level-Specific) methods
+    //region child-Level methods
     protected abstract void onCreate();
 
-    protected abstract void onDispose();
+    protected void onDispose() {
+    }
 
     protected abstract void onUpdate();
 
-    protected abstract void whilePause();
+    protected abstract void onPause();
 
-    protected abstract void onResize(int width, int height);
+    protected void onResize(int width, int height) {
+    }
 
     /**
      * When a Level is paused, Rendering continues
      * but other systems are stopped
      */
-    protected abstract void onPause();
+    protected void onSystemPause() {
+    }
 
     /**
      * Restore Level's state to what
      * it was before pausing
      */
-    protected abstract void onResume();
+    protected void onSystemResume() {
+    }
 
     public abstract void NextLevel();
 
@@ -261,27 +303,16 @@ public abstract class LevelBase implements GestureListener {
 
     //endregion
 
-    //region Delegates
-    public void AddDelegate(Delegate _delegate) {
-        delegates.add(_delegate);
-    }
-
-    public void ExecuteDelegate(String _name) {
-        for (Delegate delegate : delegates) {
-            if (delegate.name.equals(_name))
-                delegate.Execute();
-        }
-    }
-    //endregion
-
     //region Handling Engine requests
 
-    void inResponseToEngine_create() {
+    void Create() {
         if (created)
             return;
 
         SetupCamera();
+
         SetupViewport();
+
         SetupUIStage();
 
         //Loading common resources
@@ -300,6 +331,8 @@ public abstract class LevelBase implements GestureListener {
 
         SetupInputs();
 
+        osd.Init();
+
         try {
             onCreate();
         } catch (Exception e) {
@@ -313,39 +346,82 @@ public abstract class LevelBase implements GestureListener {
      * Package private:
      * must only get called by engine in response to applicationListener needs
      */
-    void inResponseToEngine_dispose() {
-        if (created) {
-            log.info("");
-            onDispose();
-            ashleyEngine.removeAllEntities();
-            batch.dispose();
-            osd.dispose();
-            debugRenderer.dispose();
-            rayHandler.dispose();
-            world.dispose();
-            assets.dispose();
-            shapeRenderer.dispose();
-            //
-            System.gc();
-            created = false;
+    void Dispose() {
+
+        log.info("");
+        onDispose();
+
+        try {
+            delegates.clear();
+        } catch (Exception e) {
+            log.error(e.getMessage());
         }
+
+        try {
+            ashleyEngine.removeAllEntities();
+        } catch (Exception e) {
+            log.error(e.getMessage());
+        }
+
+        try {
+            batch.dispose();
+        } catch (Exception e) {
+            log.error(e.getMessage());
+        }
+
+        try {
+            shapeRenderer.dispose();
+        } catch (Exception e) {
+            log.error(e.getMessage());
+        }
+
+        try {
+            osd.dispose();
+
+        } catch (Exception e) {
+            log.error(e.getMessage());
+        }
+
+        try {
+            debugRenderer.dispose();
+        } catch (Exception e) {
+            log.error(e.getMessage());
+        }
+
+        try {
+            rayHandler.dispose();
+        } catch (Exception e) {
+            log.error(e.getMessage());
+        }
+
+        try {
+            world.dispose();
+        } catch (Exception e) {
+            log.error(e.getMessage());
+        }
+
+        try {
+            assets.dispose();
+        } catch (Exception e) {
+            log.error(e.getMessage());
+        }
+
+        System.gc();
+        created = false;
     }
 
     /**
      * Package private:
      * must only get called by engine in response to applicationListener needs
      */
-    void inResponseToEngine_render(float delta) {
+    void Render(float delta) {
 
-        //Clear background
-        Gdx.gl.glClearColor(backColor.r, backColor.g, backColor.b, backColor.a);
-        Gdx.gl.glBlendFunc(GL20.GL_SRC_ALPHA, GL20.GL_ONE_MINUS_SRC_ALPHA);
-        Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
+        ClearScreen();
 
         //continue loading assets if any
         if (!created) {
             DrawProgressCircle(assets.getProgress());
-            inResponseToEngine_create();
+            Create();
             return;
         }
 
@@ -353,7 +429,7 @@ public abstract class LevelBase implements GestureListener {
             //update box2d physics world
             world.step(0.016f, 6, 2); //uses 60fps instead of deltaTime
 
-            //removing un-used bodies from the world
+            //removing unused bodies from the world
             if (!killList.isEmpty()) {
                 for (int i = 0; i < killList.size(); i++) {
                     world.destroyBody(killList.get(i));
@@ -361,20 +437,18 @@ public abstract class LevelBase implements GestureListener {
                 }
             }
 
-            // user specific updates
+            // run-time user updates while game is running
             onUpdate();
 
+            //Use default shader
             batch.setShader(null);
-            map.setShader(null);
-            if (parallax != null)
-                parallax.getBatch().setShader(null);
-        } else {
-            whilePause();
 
+        } else {
+            // run-time user updates while game is paused
+            onPause();
+
+            //Use black & white shader
             batch.setShader(GrayscaleShader.shader);
-            map.setShader(GrayscaleShader.shader);
-            if (parallax != null)
-                parallax.getBatch().setShader(GrayscaleShader.shader);
         }
 
         //Limit camera to map borders
@@ -427,17 +501,16 @@ public abstract class LevelBase implements GestureListener {
 
         //draw on-screen debug texts
         if (osdVisible)
-            osd.render(batch);
+            osd.render();
     }
 
     /**
      * Package private
      * must only get called by engine in response to applicationListener needs
      */
-    void inResponseToEngine_resize(int width, int height) {
+    void Resize(int width, int height) {
         log.info("");
         viewport.update(width, height, true);
-        uiStage.getViewport().update(width, height, true);
         onResize(width, height);
     }
 
@@ -445,13 +518,11 @@ public abstract class LevelBase implements GestureListener {
      * Package private
      * must only get called by engine in response to applicationListener needs
      */
-    void inResponseToEngine_pause() {
+    void SystemPause() {
         if (!paused) {
             log.info("");
-
-            //<---todo: systems are resposible for handling pause/resume internally
-            onPause();
             paused = true;
+            onSystemPause();
         }
     }
 
@@ -459,16 +530,57 @@ public abstract class LevelBase implements GestureListener {
      * Package private
      * must only get called by engine in response to applicationListener needs
      */
-    void inResponseToEngine_resume() {
+    void SystemResume() {
         if (paused) {
             log.info("");
             Gdx.input.setInputProcessor(multiplexer);
             if (batch.isDrawing())
                 batch.end();
-            //<---todo: systems are resposible for handling pause/resume internally
-            onResume();
             paused = false;
+            onSystemResume();
         }
+    }
+    //endregion
+
+    //region Gesture Overrided methods
+    @Override
+    public boolean touchDown(float x, float y, int pointer, int button) {
+        return false;
+    }
+
+    @Override
+    public boolean tap(float x, float y, int count, int button) {
+        return true;
+    }
+
+    @Override
+    public boolean longPress(float x, float y) {
+        return false;
+    }
+
+    @Override
+    public boolean fling(float velocityX, float velocityY, int button) {
+        return false;
+    }
+
+    @Override
+    public boolean pan(float x, float y, float deltaX, float deltaY) {
+        return true;
+    }
+
+    @Override
+    public boolean panStop(float x, float y, int pointer, int button) {
+        return false;
+    }
+
+    @Override
+    public boolean zoom(float initialDistance, float distance) {
+        return false;
+    }
+
+    @Override
+    public boolean pinch(Vector2 initialPointer1, Vector2 initialPointer2, Vector2 pointer1, Vector2 pointer2) {
+        return false;
     }
     //endregion
 

@@ -84,7 +84,7 @@ public class EntryMenu extends LevelBase {
     }
 
     @Override
-    public void whilePause() {
+    public void onPause() {
     }
 
     @Override
@@ -92,11 +92,11 @@ public class EntryMenu extends LevelBase {
     }
 
     @Override
-    public void onPause() {
+    public void onSystemPause() {
     }
 
     @Override
-    public void onResume() {
+    public void onSystemResume() {
     }
 
     @Override
