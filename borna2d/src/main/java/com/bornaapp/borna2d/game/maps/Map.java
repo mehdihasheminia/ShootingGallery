@@ -29,7 +29,7 @@ import com.bornaapp.borna2d.components.BodyComponent;
 import com.bornaapp.borna2d.components.TiledMapLayerComponent;
 import com.bornaapp.borna2d.components.ZComponent;
 import com.bornaapp.borna2d.game.levels.Engine;
-import com.bornaapp.borna2d.log;
+import com.bornaapp.borna2d.Debug.log;
 import com.bornaapp.borna2d.physics.BoxDef;
 import com.bornaapp.borna2d.physics.CircleDef;
 import com.bornaapp.borna2d.physics.LineDef;

@@ -13,7 +13,7 @@ import com.bornaapp.borna2d.components.BodyComponent;
 import com.bornaapp.borna2d.components.SoundComponent;
 import com.bornaapp.borna2d.components.TextureAtlasComponent;
 import com.bornaapp.borna2d.game.levels.Engine;
-import com.bornaapp.borna2d.log;
+import com.bornaapp.borna2d.Debug.log;
 import com.bornaapp.borna2d.physics.CapsuleDef;
 import com.bornaapp.borna2d.physics.CollisionEvent;
 

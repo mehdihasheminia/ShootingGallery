@@ -13,7 +13,7 @@ import com.badlogic.gdx.graphics.g2d.TextureAtlas;
 import com.badlogic.gdx.maps.tiled.TiledMap;
 import com.badlogic.gdx.maps.tiled.TmxMapLoader;
 import com.badlogic.gdx.utils.Json;
-import com.bornaapp.borna2d.log;
+import com.bornaapp.borna2d.Debug.log;
 
 /**
  * Created by Mehdi on 08/26/2015.

@@ -5,7 +5,6 @@ import com.badlogic.gdx.math.Vector2;
 import com.bornaapp.borna2d.ai.AStarGraph;
 import com.bornaapp.borna2d.ai.AStarPath;
 import com.bornaapp.borna2d.ai.Node;
-import com.bornaapp.borna2d.log;
 
 /**
  * Created by Mehdi on 8/29/2015.

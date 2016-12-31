@@ -5,7 +5,7 @@ import com.badlogic.gdx.files.FileHandle;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Json;
 import com.badlogic.gdx.utils.JsonWriter;
-import com.bornaapp.borna2d.log;
+import com.bornaapp.borna2d.Debug.log;
 
 /**
  * Engine class uses singleton pattern to Ensure it has

@@ -2,7 +2,6 @@ package com.bornaapp.borna2d.physics;
 
 import com.badlogic.gdx.physics.box2d.Body;
 import com.badlogic.gdx.physics.box2d.Fixture;
-import com.bornaapp.borna2d.log;
 
 public abstract class CollisionEvent {
 

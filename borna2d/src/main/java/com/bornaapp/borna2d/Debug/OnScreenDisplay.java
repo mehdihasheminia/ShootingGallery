@@ -1,14 +1,17 @@
-package com.bornaapp.borna2d;
+package com.bornaapp.borna2d.Debug;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Camera;
+import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
+import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
 import com.bornaapp.borna2d.game.levels.Engine;
+import com.bornaapp.borna2d.iDispose;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -19,6 +22,8 @@ public class OnScreenDisplay implements iDispose {
     SpriteBatch batch;
     ShapeRenderer shapeRenderer;
     Camera camera;
+
+    float offsetX = 0f;
 
     private boolean f1 = false;
 
@@ -34,6 +39,8 @@ public class OnScreenDisplay implements iDispose {
         //Use LibGDX's default Arial font.
         font = new BitmapFont();
         font.setColor(Color.CYAN);
+        font.getRegion().getTexture().setFilter(Texture.TextureFilter.Linear, Texture.TextureFilter.Linear);
+//        font.getData().setScale(2f);
         populateF1List();
 
         batch = engine.getCurrentLevel().getBatch();
@@ -107,21 +114,36 @@ public class OnScreenDisplay implements iDispose {
 
     private void DrawMouseLocation() {
         //convert mouse pointer coordinates from screen-space to world-space
-        Vector3 worldCoord = camera.unproject(new Vector3(Gdx.input.getX(), Gdx.input.getY(), 0));
+        Vector3 mouseInWorldCoord = camera.unproject(new Vector3(Gdx.input.getX(), Gdx.input.getY(), 0));
+        Vector3 screenInWorldCoord = camera.unproject(new Vector3(engine.ScreenWidth(), engine.ScreenHeight(), 0));
+
+        shapeRenderer.setProjectionMatrix(camera.combined);
 
         //Draw grids
         shapeRenderer.setColor(Color.BLACK);
         shapeRenderer.begin(ShapeRenderer.ShapeType.Line);
-        shapeRenderer.line(worldCoord.x + 10, worldCoord.y, 0, worldCoord.y);
-        shapeRenderer.line(worldCoord.x, worldCoord.y + 10, worldCoord.x, 0);
+        shapeRenderer.line(mouseInWorldCoord.x + 10, mouseInWorldCoord.y, 0, mouseInWorldCoord.y);
+        shapeRenderer.line(mouseInWorldCoord.x, mouseInWorldCoord.y + 10, mouseInWorldCoord.x, 0);
         shapeRenderer.end();
 
         if (!batch.isDrawing())
             batch.begin();
-
-        font.draw(batch, "( " + Integer.toString((int)worldCoord.x) + ", " + Integer.toString((int)worldCoord.y) + " )", worldCoord.x + 10, worldCoord.y + 10);
-
+        String txt = "( " + Integer.toString((int) mouseInWorldCoord.x) + ", " + Integer.toString((int) mouseInWorldCoord.y) + " )";
+        com.badlogic.gdx.graphics.g2d.GlyphLayout glyphLayout = font.draw(batch, txt, mouseInWorldCoord.x-offsetX, mouseInWorldCoord.y);
         batch.end();
+
+        Rectangle rect = new Rectangle(mouseInWorldCoord.x, mouseInWorldCoord.y - glyphLayout.height, glyphLayout.width, glyphLayout.height);
+
+        float newOffest = rect.x + rect.width - screenInWorldCoord.x;
+        offsetX = Math.max(newOffest, offsetX);
+        if(newOffest < 0)
+            offsetX = 0;
+        log.info(offsetX);
+
+        shapeRenderer.begin(ShapeRenderer.ShapeType.Line);
+        shapeRenderer.setColor(Color.BLUE);
+        shapeRenderer.rect(rect.x, rect.y, rect.width, rect.height);
+        shapeRenderer.end();
     }
 
     public void render() {

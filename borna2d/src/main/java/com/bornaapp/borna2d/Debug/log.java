@@ -1,4 +1,4 @@
-package com.bornaapp.borna2d;
+package com.bornaapp.borna2d.Debug;
 
 import com.badlogic.gdx.math.Vector2;
 import com.bornaapp.borna2d.game.levels.Engine;

@@ -2,7 +2,6 @@ package com.bornaapp.borna2d.game.maps;
 
 import com.badlogic.gdx.maps.tiled.renderers.OrthogonalTiledMapRenderer;
 import com.bornaapp.borna2d.game.levels.*;
-import com.bornaapp.borna2d.log;
 
 /**
  * Created by Hashemi on 11/15/2016.

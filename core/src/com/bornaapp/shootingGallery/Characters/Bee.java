@@ -11,15 +11,12 @@ import com.badlogic.gdx.physics.box2d.BodyDef;
 import com.badlogic.gdx.physics.box2d.Fixture;
 import com.badlogic.gdx.utils.Array;
 import com.bornaapp.borna2d.ai.AStarGraph;
-import com.bornaapp.borna2d.ai.GraphType;
 import com.bornaapp.borna2d.components.AnimationComponent;
 import com.bornaapp.borna2d.components.BodyComponent;
 import com.bornaapp.borna2d.components.PathComponent;
-import com.bornaapp.borna2d.components.SoundComponent;
 import com.bornaapp.borna2d.components.TextureAtlasComponent;
 import com.bornaapp.borna2d.components.ZComponent;
 import com.bornaapp.borna2d.game.levels.Engine;
-import com.bornaapp.borna2d.log;
 import com.bornaapp.borna2d.physics.CircleDef;
 import com.bornaapp.borna2d.physics.CollisionEvent;
 

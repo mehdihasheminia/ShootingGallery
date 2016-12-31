@@ -9,7 +9,7 @@ import com.bornaapp.borna2d.ai.AStarPath;
 import com.bornaapp.borna2d.ai.PathRenderer;
 import com.bornaapp.borna2d.components.PathComponent;
 import com.bornaapp.borna2d.game.levels.LevelBase;
-import com.bornaapp.borna2d.log;
+import com.bornaapp.borna2d.Debug.log;
 
 /**
  * Created by Mehdi on 08/30/2015.

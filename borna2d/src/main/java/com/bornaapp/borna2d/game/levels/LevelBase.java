@@ -16,14 +16,14 @@ import com.badlogic.gdx.physics.box2d.World;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.utils.viewport.ExtendViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
-import com.bornaapp.borna2d.OnScreenDisplay;
+import com.bornaapp.borna2d.Debug.OnScreenDisplay;
 import com.bornaapp.borna2d.asset.Assets;
 import com.bornaapp.borna2d.game.maps.Map;
 import com.bornaapp.borna2d.game.maps.OrthogonalMap;
 import com.bornaapp.borna2d.graphics.Background;
 import com.bornaapp.borna2d.graphics.GrayscaleShader;
 import com.bornaapp.borna2d.graphics.ParallaxBackground;
-import com.bornaapp.borna2d.log;
+import com.bornaapp.borna2d.Debug.log;
 import com.bornaapp.borna2d.physics.CollisionListener;
 import com.bornaapp.borna2d.physics.DebugRenderer2D;
 

@@ -7,7 +7,6 @@ import com.badlogic.ashley.systems.IteratingSystem;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
-import com.badlogic.gdx.maps.tiled.TiledMapImageLayer;
 import com.badlogic.gdx.maps.tiled.TiledMapRenderer;
 import com.badlogic.gdx.utils.Array;
 import com.bornaapp.borna2d.PlayStatus;
@@ -18,7 +17,7 @@ import com.bornaapp.borna2d.components.TiledMapLayerComponent;
 import com.bornaapp.borna2d.game.levels.Engine;
 import com.bornaapp.borna2d.components.TextureAtlasComponent;
 import com.bornaapp.borna2d.game.levels.LevelBase;
-import com.bornaapp.borna2d.log;
+import com.bornaapp.borna2d.Debug.log;
 
 import java.util.Comparator;
 
