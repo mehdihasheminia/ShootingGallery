@@ -14,39 +14,23 @@ import com.bornaapp.borna2d.game.levels.Engine;
 import com.bornaapp.borna2d.iDispose;
 
 import java.util.ArrayList;
+import java.util.EnumSet;
 import java.util.List;
 
 public class OnScreenDisplay implements iDispose {
+
+    EnumSet<osdFlag> flags = EnumSet.allOf(osdFlag.class);
+    ;
 
     Engine engine = Engine.getInstance();
     SpriteBatch batch;
     ShapeRenderer shapeRenderer;
     Camera camera;
 
-    float offsetX = 0f;
-
-    private boolean f1 = false;
-
     private List<LogData> logList = new ArrayList<LogData>();
-    private List<String> f1List = new ArrayList<String>();
 
-    private BitmapFont font;
-
-    public OnScreenDisplay() {
-    }
-
-    public void Init() {
-        //Use LibGDX's default Arial font.
-        font = new BitmapFont();
-        font.setColor(Color.CYAN);
-        font.getRegion().getTexture().setFilter(Texture.TextureFilter.Linear, Texture.TextureFilter.Linear);
-//        font.getData().setScale(2f);
-        populateF1List();
-
-        batch = engine.getCurrentLevel().getBatch();
-        shapeRenderer = engine.getCurrentLevel().getShapeRenderer();
-        camera = Engine.getInstance().getCurrentLevel().getCamera();
-    }
+    private BitmapFont font = new BitmapFont();
+    float posCorrectionX = 0f;
 
     private class LogData {
         String title;
@@ -56,6 +40,19 @@ public class OnScreenDisplay implements iDispose {
             title = _title;
             value = _value;
         }
+    }
+
+    public OnScreenDisplay() {
+
+    }
+
+    public void Init() {
+        //Use LibGDX's default Arial font.
+        font.getRegion().getTexture().setFilter(Texture.TextureFilter.Linear, Texture.TextureFilter.Linear);
+
+        batch = engine.getCurrentLevel().getBatch();
+        shapeRenderer = engine.getCurrentLevel().getShapeRenderer();
+        camera = Engine.getInstance().getCurrentLevel().getCamera();
     }
 
     public void log(String title, int value) {
@@ -83,30 +80,42 @@ public class OnScreenDisplay implements iDispose {
         logList.add(new LogData(title, value));
     }
 
+    private void DrawLogs() {
+        try {
+            Vector2 linePos = new Vector2(5 * font.getSpaceWidth(), font.getLineHeight());
+            font.setColor(Color.CYAN);
+
+            if (!batch.isDrawing())
+                batch.begin();
+            for (LogData data : logList) {
+                font.draw(batch, data.title + " : " + data.value, linePos.x, linePos.y);
+                linePos.y += font.getLineHeight();
+            }
+            batch.end();
+
+        } catch (Exception e) {
+            log.error(e.getMessage());
+        }
+    }
+
     private void DrawGrids(int pixel) {
 
-        //with and height of the container
-        float viewportWidth = camera.viewportWidth;
-        float viewportHeight = camera.viewportHeight;
-
-        shapeRenderer.setProjectionMatrix(camera.combined);
-
-        //Draw viewport Rect
+        //Draw viewport boundary Rect
         shapeRenderer.setColor(Color.DARK_GRAY);
         shapeRenderer.begin(ShapeRenderer.ShapeType.Line);
-        shapeRenderer.rect(0, 0, viewportWidth - 1, viewportHeight - 1);
+        shapeRenderer.rect(0, 0, camera.viewportWidth - 1, camera.viewportHeight - 1);
         shapeRenderer.end();
 
         //Draw grids
         shapeRenderer.setColor(Color.GRAY);
         shapeRenderer.begin(ShapeRenderer.ShapeType.Line);
 
-        for (int x = 0; x < viewportWidth; x += pixel) {
-            shapeRenderer.line(x, 0, x, viewportHeight);
+        for (int x = 0; x < camera.viewportWidth; x += pixel) {
+            shapeRenderer.line(x, 0, x, camera.viewportHeight);
         }
 
-        for (int y = 0; y < viewportHeight; y += pixel) {
-            shapeRenderer.line(0, y, viewportWidth, y);
+        for (int y = 0; y < camera.viewportHeight; y += pixel) {
+            shapeRenderer.line(0, y, camera.viewportWidth, y);
         }
 
         shapeRenderer.end();
@@ -117,63 +126,43 @@ public class OnScreenDisplay implements iDispose {
         Vector3 mouseInWorldCoord = camera.unproject(new Vector3(Gdx.input.getX(), Gdx.input.getY(), 0));
         Vector3 screenInWorldCoord = camera.unproject(new Vector3(engine.ScreenWidth(), engine.ScreenHeight(), 0));
 
-        shapeRenderer.setProjectionMatrix(camera.combined);
-
-        //Draw grids
+        //Draw Mouse position lines
         shapeRenderer.setColor(Color.BLACK);
         shapeRenderer.begin(ShapeRenderer.ShapeType.Line);
         shapeRenderer.line(mouseInWorldCoord.x + 10, mouseInWorldCoord.y, 0, mouseInWorldCoord.y);
         shapeRenderer.line(mouseInWorldCoord.x, mouseInWorldCoord.y + 10, mouseInWorldCoord.x, 0);
         shapeRenderer.end();
 
+        //Draw Text
+        font.setColor(Color.BLACK);
         if (!batch.isDrawing())
             batch.begin();
         String txt = "( " + Integer.toString((int) mouseInWorldCoord.x) + ", " + Integer.toString((int) mouseInWorldCoord.y) + " )";
-        com.badlogic.gdx.graphics.g2d.GlyphLayout glyphLayout = font.draw(batch, txt, mouseInWorldCoord.x-offsetX, mouseInWorldCoord.y);
+        com.badlogic.gdx.graphics.g2d.GlyphLayout glyphLayout = font.draw(batch, txt, mouseInWorldCoord.x - posCorrectionX, mouseInWorldCoord.y);
         batch.end();
 
+        // Calculate text bounding rectangle and
+        // correct text position when clipped
         Rectangle rect = new Rectangle(mouseInWorldCoord.x, mouseInWorldCoord.y - glyphLayout.height, glyphLayout.width, glyphLayout.height);
 
         float newOffest = rect.x + rect.width - screenInWorldCoord.x;
-        offsetX = Math.max(newOffest, offsetX);
-        if(newOffest < 0)
-            offsetX = 0;
-        log.info(offsetX);
-
-        shapeRenderer.begin(ShapeRenderer.ShapeType.Line);
-        shapeRenderer.setColor(Color.BLUE);
-        shapeRenderer.rect(rect.x, rect.y, rect.width, rect.height);
-        shapeRenderer.end();
+        posCorrectionX = Math.max(newOffest, posCorrectionX);
+        if (newOffest < 0)
+            posCorrectionX = 0;
     }
 
     public void render() {
         try {
 
-            DrawMouseLocation();
+            if (flags.contains(osdFlag.ShowGrids))
+                DrawGrids(engine.getConfig().ppm);
 
-            float xMargin = 20f;
-            float yMargin = 20f;
-            float lineHeight = 20f;
+            if (flags.contains(osdFlag.ShowMousePosition))
+                DrawMouseLocation();
 
-            float x = xMargin - camera.viewportWidth / 2;
-            float y = yMargin - camera.viewportHeight / 2;
+            if (flags.contains(osdFlag.ShowStrings))
+                DrawLogs();
 
-            batch.setProjectionMatrix(camera.projection);
-
-            if (!batch.isDrawing())
-                batch.begin();
-            if (f1) {
-                for (String str : f1List) {
-                    font.draw(batch, str, x, y);
-                    y += lineHeight;
-                }
-            } else {
-                for (LogData data : logList) {
-                    font.draw(batch, data.title + " : " + data.value, x, y);
-                    y += lineHeight;
-                }
-            }
-            batch.end();
         } catch (Exception e) {
             log.error(e.getMessage());
         }
@@ -185,21 +174,11 @@ public class OnScreenDisplay implements iDispose {
         logList.clear();
     }
 
-    //region utility methods
-
-    public boolean getF1() {
-        return f1;
+    public void setFontScale(float scale) {
+        font.getData().setScale(scale);
     }
 
-    public void SetF1(boolean _state) {
-        f1 = _state;
-    }
+    public void setFlag(EnumSet<osdFlag> _flags) {
 
-    public void populateF1List() {
-        f1List.add("F1   : Show/Hide instructions");
-        f1List.add("F2   : Show/Hide Logs");
-        f1List.add("NUM_1  Enable/Disable Lighting: ");
-        f1List.add("NUM_2: Show/Hide bounding areas");
     }
-    //endregion
 }

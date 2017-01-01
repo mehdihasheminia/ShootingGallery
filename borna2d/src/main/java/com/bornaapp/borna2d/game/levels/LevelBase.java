@@ -148,7 +148,7 @@ public abstract class LevelBase implements GestureListener {
     }
 
     private void DrawProgressCircle(float progress) {
-        shapeRenderer.setProjectionMatrix(camera.combined);
+
         //Circle position and size
         float x = engine.ScreenWidth() / 2;
         float y = engine.ScreenHeight() / 2;
@@ -464,6 +464,7 @@ public abstract class LevelBase implements GestureListener {
         // Update camera matrix
         camera.update();
         batch.setProjectionMatrix(camera.combined);
+        shapeRenderer.setProjectionMatrix(camera.combined);
 
         //start batch rendering
         if (batch.isDrawing())
