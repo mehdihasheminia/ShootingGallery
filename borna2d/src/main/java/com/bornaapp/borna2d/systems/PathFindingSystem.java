@@ -4,10 +4,12 @@ import com.badlogic.ashley.core.ComponentMapper;
 import com.badlogic.ashley.core.Entity;
 import com.badlogic.ashley.core.Family;
 import com.badlogic.ashley.systems.IteratingSystem;
-import com.bornaapp.borna2d.ai.AStarGraph;
+import com.badlogic.ashley.utils.ImmutableArray;
+import com.badlogic.gdx.utils.Array;
 import com.bornaapp.borna2d.ai.AStarPath;
 import com.bornaapp.borna2d.ai.PathRenderer;
 import com.bornaapp.borna2d.components.PathComponent;
+import com.bornaapp.borna2d.game.levels.Engine;
 import com.bornaapp.borna2d.game.levels.LevelBase;
 import com.bornaapp.borna2d.Debug.log;
 
@@ -17,7 +19,7 @@ import com.bornaapp.borna2d.Debug.log;
  */
 public class PathFindingSystem extends IteratingSystem {
 
-    Sync sync;
+    private Sync sync;
     private PathRenderer pathRenderer = null;
     private ComponentMapper<PathComponent> pathMap;
 
@@ -54,15 +56,14 @@ public class PathFindingSystem extends IteratingSystem {
         sync.setVelocity(entity, pathComp.getVelocity());
     }
 
-    public void InitDebugRenderer(AStarGraph graph) {
-        pathRenderer = new PathRenderer(graph);
-    }
-
     private void RenderDebug(AStarPath path) {
         try {
             pathRenderer.drawPath(path);
         } catch (Exception e) {
-            log.error(e.getMessage() + " , PathRenderer is not Initialized");
+            log.error(e.getMessage());
         }
     }
+
+//    public Array<AStarPath> getAllPath() {
+//    }
 }

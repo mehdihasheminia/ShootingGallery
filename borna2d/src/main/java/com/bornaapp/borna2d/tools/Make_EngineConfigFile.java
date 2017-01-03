@@ -4,6 +4,7 @@ import com.badlogic.gdx.files.FileHandle;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.Json;
 import com.badlogic.gdx.utils.JsonWriter;
+import com.bornaapp.borna2d.Debug.LogLevel;
 import com.bornaapp.borna2d.game.levels.EngineConfig;
 
 import java.nio.file.Paths;
@@ -19,7 +20,7 @@ public class Make_EngineConfigFile {
     public static void main(String[] arg) {
         //default configuration
         EngineConfig engineConfig = new EngineConfig();
-        engineConfig.logLevel = 0;
+        engineConfig.logLevel = LogLevel.NONE;
         engineConfig.gravity = new Vector2();
         engineConfig.ppm = 32;
         // makes config file & writes data to it.

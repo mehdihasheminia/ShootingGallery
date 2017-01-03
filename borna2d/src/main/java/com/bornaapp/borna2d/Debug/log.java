@@ -14,13 +14,6 @@ import com.bornaapp.borna2d.game.levels.Engine;
 
 public class log {
 
-    private enum LogLevel {
-        LOG_NONE,     // Application.LOG_NONE=0.   mutes all logging.
-        LOG_ERROR,    // Application.LOG_ERROR=1.  logs only error messages.
-        LOG_INFO,     // Application.LOG_INFO=2.   logs error & info messages(non debug messages).
-        LOG_DEBUG     // Application.LOG_DEBUG=3.  logs all messages.
-    }
-
     private static final char BACKSLASH = (char) 27;
     // ANSI scape codes
     private static final String ANSI_RESET = "[0m";
@@ -33,6 +26,7 @@ public class log {
     private static final String ANSI_CYAN = "6";
     private static final String ANSI_WHITE = "7";
 
+    //region private methods
     private static void text(String textToPrint, String foreColor) {
         String ansiFormat = "[3" + foreColor + "m";
         System.out.println(BACKSLASH + ansiFormat + textToPrint + BACKSLASH + ANSI_RESET);
@@ -44,21 +38,7 @@ public class log {
     }
 
     private static LogLevel getEngineLogLevel() {
-        try {
-            switch (Engine.getInstance().getConfig().logLevel) {
-                case 1:
-                    return LogLevel.LOG_ERROR;
-                case 2:
-                    return LogLevel.LOG_INFO;
-                case 3:
-                    return LogLevel.LOG_DEBUG;
-                case 0:
-                default:
-                    return LogLevel.LOG_NONE;
-            }
-        } catch (Exception e) {
-            return LogLevel.LOG_NONE;
-        }
+        return Engine.getInstance().getConfig().logLevel;
     }
 
     private static String getCurrentLevelName() {
@@ -84,9 +64,11 @@ public class log {
             return "UnknownMethod";
         }
     }
+    //endregion
 
+    //region public methods
     public static void error(String message) {
-        if (getEngineLogLevel() == LogLevel.LOG_NONE)
+        if (getEngineLogLevel() == LogLevel.NONE)
             return;
         text(getCurrentLevelName() + "; " + getCurrentMethodName() + ": " + message, ANSI_RED);
     }
@@ -112,7 +94,7 @@ public class log {
     }
 
     public static void info(String message) {
-        if (getEngineLogLevel() == LogLevel.LOG_ERROR || getEngineLogLevel() == LogLevel.LOG_NONE)
+        if (getEngineLogLevel() == LogLevel.ERROR || getEngineLogLevel() == LogLevel.NONE)
             return;
         text(getCurrentLevelName() + "; " + getCurrentMethodName() + ": " + message, ANSI_BLUE);
     }
@@ -138,7 +120,7 @@ public class log {
     }
 
     public static void debug(String message) {
-        if (getEngineLogLevel() == LogLevel.LOG_ERROR || getEngineLogLevel() == LogLevel.LOG_INFO || getEngineLogLevel() == LogLevel.LOG_NONE)
+        if (getEngineLogLevel() == LogLevel.ERROR || getEngineLogLevel() == LogLevel.INFO || getEngineLogLevel() == LogLevel.NONE)
             return;
         text(getCurrentLevelName() + "; " + getCurrentMethodName() + ": " + message, ANSI_BLACK);
     }
@@ -162,4 +144,5 @@ public class log {
     public static void debug(Vector2 value) {
         debug("[" + Float.toString(value.x) + ", " + Float.toString(value.y) + "]");
     }
+    //endregion
 }

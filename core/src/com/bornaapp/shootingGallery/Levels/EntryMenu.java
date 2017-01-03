@@ -8,13 +8,13 @@ import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener;
 import com.bornaapp.borna2d.game.levels.Engine;
 import com.bornaapp.borna2d.game.levels.LevelBase;
+import com.bornaapp.borna2d.game.levels.LevelFlags;
 import com.bornaapp.borna2d.graphics.Background;
 
 public class EntryMenu extends LevelBase {
     public EntryMenu() {
         super("assetManifest_entryMenu.json");
-
-        loadProgressively = false;
+        flags.set(LevelFlags.LoadProgressively);
     }
 
     @Override

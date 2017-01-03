@@ -10,27 +10,26 @@ import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
+import com.bornaapp.borna2d.Flags;
 import com.bornaapp.borna2d.game.levels.Engine;
 import com.bornaapp.borna2d.iDispose;
 
 import java.util.ArrayList;
-import java.util.EnumSet;
 import java.util.List;
 
 public class OnScreenDisplay implements iDispose {
 
-    EnumSet<osdFlag> flags = EnumSet.allOf(osdFlag.class);
-    ;
+    public Flags<osdFlag> flags = new Flags<osdFlag>(osdFlag.class);
 
-    Engine engine = Engine.getInstance();
-    SpriteBatch batch;
-    ShapeRenderer shapeRenderer;
-    Camera camera;
+    private Engine engine = Engine.getInstance();
+    private SpriteBatch batch;
+    private ShapeRenderer shapeRenderer;
+    private Camera camera;
 
     private List<LogData> logList = new ArrayList<LogData>();
 
     private BitmapFont font = new BitmapFont();
-    float posCorrectionX = 0f;
+    private float posCorrectionX = 0f;
 
     private class LogData {
         String title;
@@ -43,7 +42,6 @@ public class OnScreenDisplay implements iDispose {
     }
 
     public OnScreenDisplay() {
-
     }
 
     public void Init() {
@@ -64,7 +62,11 @@ public class OnScreenDisplay implements iDispose {
     }
 
     public void log(String title, Vector2 value) {
-        log(title, Float.toString(value.x) + "," + Float.toString(value.y));
+        log(title, "[" + Float.toString(value.x) + ", " + Float.toString(value.y) + "]");
+    }
+
+    public void log(String title) {
+        log(title, "");
     }
 
     public void log(String title, String value) {
@@ -88,7 +90,7 @@ public class OnScreenDisplay implements iDispose {
             if (!batch.isDrawing())
                 batch.begin();
             for (LogData data : logList) {
-                font.draw(batch, data.title + " : " + data.value, linePos.x, linePos.y);
+                font.draw(batch, data.title + (data.value.isEmpty() ? "" : " : " + data.value), linePos.x, linePos.y);
                 linePos.y += font.getLineHeight();
             }
             batch.end();
@@ -153,6 +155,8 @@ public class OnScreenDisplay implements iDispose {
 
     public void render() {
         try {
+            if (engine.getConfig().logLevel == LogLevel.NONE)
+                return;
 
             if (flags.contains(osdFlag.ShowGrids))
                 DrawGrids(engine.getConfig().ppm);
@@ -160,7 +164,7 @@ public class OnScreenDisplay implements iDispose {
             if (flags.contains(osdFlag.ShowMousePosition))
                 DrawMouseLocation();
 
-            if (flags.contains(osdFlag.ShowStrings))
+            if (flags.contains(osdFlag.ShowLogs))
                 DrawLogs();
 
         } catch (Exception e) {
@@ -174,11 +178,11 @@ public class OnScreenDisplay implements iDispose {
         logList.clear();
     }
 
-    public void setFontScale(float scale) {
-        font.getData().setScale(scale);
+    public void clearLogList() {
+        logList.clear();
     }
 
-    public void setFlag(EnumSet<osdFlag> _flags) {
-
+    public void setFontScale(float scale) {
+        font.getData().setScale(scale);
     }
 }

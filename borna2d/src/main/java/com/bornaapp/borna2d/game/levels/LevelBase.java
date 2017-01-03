@@ -17,6 +17,7 @@ import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.utils.viewport.ExtendViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
 import com.bornaapp.borna2d.Debug.OnScreenDisplay;
+import com.bornaapp.borna2d.Flags;
 import com.bornaapp.borna2d.asset.Assets;
 import com.bornaapp.borna2d.game.maps.Map;
 import com.bornaapp.borna2d.game.maps.OrthogonalMap;
@@ -26,6 +27,9 @@ import com.bornaapp.borna2d.graphics.ParallaxBackground;
 import com.bornaapp.borna2d.Debug.log;
 import com.bornaapp.borna2d.physics.CollisionListener;
 import com.bornaapp.borna2d.physics.DebugRenderer2D;
+import com.bornaapp.borna2d.systems.PathFindingSystem;
+import com.bornaapp.borna2d.systems.RenderingSystem;
+import com.bornaapp.borna2d.systems.SoundSystem;
 
 import java.util.ArrayList;
 
@@ -38,14 +42,17 @@ public abstract class LevelBase implements GestureListener {
 
     protected Engine engine = Engine.getInstance();
 
-    private String assetManifestPath;
-    public Assets assets = new Assets();
-    public boolean loadProgressively = true;
-
-    private ArrayList<Delegate> delegates = new ArrayList<Delegate>();
-
     private boolean created = false;
     private boolean paused = false;
+
+    public Flags<LevelFlags> flags = new Flags<LevelFlags>(LevelFlags.class);
+    private ArrayList<Delegate> delegates = new ArrayList<Delegate>();
+
+    private String assetManifestPath;
+    public Assets assets = new Assets();
+
+    private OrthographicCamera camera;
+    private Viewport viewport;
 
     public Color backColor = Color.DARK_GRAY;
     final private SpriteBatch batch = new SpriteBatch();
@@ -56,25 +63,24 @@ public abstract class LevelBase implements GestureListener {
 
     private Map map = new OrthogonalMap();
 
-    public Stage uiStage = new Stage();
-    public boolean debugUI = false;
-
-    private OrthographicCamera camera;
-    private Viewport viewport;
+    public Stage uiStage;
 
     private World world;
-    private ArrayList<Body> killList = new ArrayList<Body>();
-    public boolean debugPhysics = false;
+    private ArrayList<Body> killList;
     public DebugRenderer2D debugRenderer = new DebugRenderer2D();
 
-    private boolean enableLights = false;
     private RayHandler rayHandler;
 
-    InputMultiplexer multiplexer = new InputMultiplexer();
-
-    private PooledEngine ashleyEngine = new PooledEngine();
+    private PooledEngine ashleyEngine;
+    private PathFindingSystem pathFindingSystem;
+    private RenderingSystem renderingSystem;
+    private SoundSystem soundSystem;
     int systemPriority;
     int defaultZ = 0;
+
+    InputMultiplexer multiplexer;
+
+    public OnScreenDisplay osd = new OnScreenDisplay();
 
     //region Constructor
 
@@ -174,8 +180,9 @@ public abstract class LevelBase implements GestureListener {
     }
 
     private void SetupPhysicsWorld() {
-        world = new World(engine.getConfig().gravity, false);//Engine.getCurrentLevel().getMap().params.gravity
+        world = new World(engine.getConfig().gravity, false);
         world.setContactListener(new CollisionListener());
+        killList = new ArrayList<Body>();
     }
 
     public void AddToKillList(Body body) {
@@ -185,21 +192,12 @@ public abstract class LevelBase implements GestureListener {
     //endregion
 
     //region Lights
-
-    public void setLightingEnabled(boolean _enableLights) {
-        this.enableLights = _enableLights;
-    }
-
-    public boolean getLightingEnabled() {
-        return enableLights;
-    }
-
     public RayHandler getRayHandler() {
         return rayHandler;
     }
 
-    private void SetupLights() {
-        rayHandler = new RayHandler(world);
+    private void SetupLights(World _world) {
+        rayHandler = new RayHandler(_world);
     }
     //endregion
 
@@ -212,7 +210,17 @@ public abstract class LevelBase implements GestureListener {
     //endregion
 
     //region Ashley
-    //todo...."ashley event system" can be used to dispose() resources that are not part of assets like PointLight
+    private void SetupAshley(){
+        ashleyEngine = new PooledEngine();
+
+        pathFindingSystem = new PathFindingSystem(this);
+        renderingSystem = new RenderingSystem(this);
+        soundSystem = new SoundSystem(this);
+
+        ashleyEngine.addSystem(pathFindingSystem);
+        ashleyEngine.addSystem(renderingSystem);
+        ashleyEngine.addSystem(soundSystem);
+    }
 
     public PooledEngine getAshleyEngine() {
         return ashleyEngine;
@@ -229,8 +237,9 @@ public abstract class LevelBase implements GestureListener {
 
     //region Input management
 
-    private void SetupInputs() {
-        multiplexer.addProcessor(uiStage);
+    private void SetupInputs(Stage _uiStage) {
+        multiplexer = new InputMultiplexer();
+        multiplexer.addProcessor(_uiStage);
         multiplexer.addProcessor(new GestureDetector(this));
         Gdx.input.setInputProcessor(multiplexer);
     }
@@ -245,29 +254,23 @@ public abstract class LevelBase implements GestureListener {
         camera = new OrthographicCamera();
     }
 
-    private void SetupViewport() {
+    private void SetupViewport(OrthographicCamera _camera) {
         // a viewport manages the method the camera uses to map any point in world space to camera space.
         // As we resize the window, viewport width and height remains constant and scales the rendering content
         // to match the new window Width and Height.
-        viewport = new ExtendViewport(engine.ScreenWidth(), engine.ScreenHeight(), camera);
+        viewport = new ExtendViewport(engine.ScreenWidth(), engine.ScreenHeight(), _camera);
         viewport.apply(true);
         viewport.update(engine.ScreenWidth(), engine.ScreenHeight());
     }
 
-    private void SetupUIStage() {
-
-        uiStage = new Stage(viewport);
+    private void SetupUIStage(Viewport _viewport) {
+        uiStage = new Stage(_viewport);
     }
 
     public OrthographicCamera getCamera() {
         return camera;
     }
 
-    //endregion
-
-    //region Debug on-Screen display
-    public boolean osdVisible = true;
-    public OnScreenDisplay osd = new OnScreenDisplay();
     //endregion
 
     //region child-Level methods
@@ -308,29 +311,23 @@ public abstract class LevelBase implements GestureListener {
     void Create() {
         if (created)
             return;
+        log.info("");
 
         SetupCamera();
-
-        SetupViewport();
-
-        SetupUIStage();
+        SetupViewport(camera);
+        SetupUIStage(viewport);
 
         //Loading common resources
         assets.LoadAll("assetManifest_common.json");
-
         //Loading level-specific resources
-        boolean isLoadingInProgress = LoadAssets(loadProgressively);
+        boolean isLoadingInProgress = LoadAssets(flags.contains(LevelFlags.LoadProgressively));
         if (isLoadingInProgress)
             return;
 
-        log.info("");
-
         SetupPhysicsWorld();
-
-        SetupLights();
-
-        SetupInputs();
-
+        SetupLights(world);
+        SetupAshley();
+        SetupInputs(uiStage);
         osd.Init();
 
         try {
@@ -347,66 +344,59 @@ public abstract class LevelBase implements GestureListener {
      * must only get called by engine in response to applicationListener needs
      */
     void Dispose() {
-
         log.info("");
         onDispose();
-
         try {
             delegates.clear();
         } catch (Exception e) {
             log.error(e.getMessage());
         }
-
         try {
             ashleyEngine.removeAllEntities();
         } catch (Exception e) {
             log.error(e.getMessage());
         }
-
         try {
             batch.dispose();
         } catch (Exception e) {
             log.error(e.getMessage());
         }
-
         try {
             shapeRenderer.dispose();
         } catch (Exception e) {
             log.error(e.getMessage());
         }
-
         try {
             osd.dispose();
 
         } catch (Exception e) {
             log.error(e.getMessage());
         }
-
         try {
             debugRenderer.dispose();
         } catch (Exception e) {
             log.error(e.getMessage());
         }
-
         try {
             rayHandler.dispose();
         } catch (Exception e) {
             log.error(e.getMessage());
         }
-
         try {
             world.dispose();
         } catch (Exception e) {
             log.error(e.getMessage());
         }
-
         try {
             assets.dispose();
         } catch (Exception e) {
             log.error(e.getMessage());
         }
-
-        System.gc();
+        try {
+            System.gc();
+        } catch (Exception e) {
+            log.error(e.getMessage());
+        }
         created = false;
     }
 
@@ -430,36 +420,46 @@ public abstract class LevelBase implements GestureListener {
             world.step(0.016f, 6, 2); //uses 60fps instead of deltaTime
 
             //removing unused bodies from the world
-            if (!killList.isEmpty()) {
-                for (int i = 0; i < killList.size(); i++) {
-                    world.destroyBody(killList.get(i));
-                    killList.remove(i);
-                }
-            }
+//            if (!killList.isEmpty()) {
+//                for (int i = 0; i < killList.size(); i++) {
+//                    world.destroyBody(killList.get(i));
+//                    killList.remove(i);
+//                }
+//            }
 
             // run-time user updates while game is running
-            onUpdate();
+            try {
+                onUpdate();
+            } catch (Exception e) {
+                log.error(e.getMessage());
+            }
 
             //Use default shader
             batch.setShader(null);
 
         } else {
             // run-time user updates while game is paused
-            onPause();
+            try {
+                onPause();
+            } catch (Exception e) {
+                log.error(e.getMessage());
+            }
 
             //Use black & white shader
             batch.setShader(GrayscaleShader.shader);
         }
 
         //Limit camera to map borders
-        if (camera.position.x > map.getWidth_inPixels() - camera.viewportWidth / 2)
-            camera.position.x = map.getWidth_inPixels() - camera.viewportWidth / 2;
-        if (camera.position.x < camera.viewportWidth / 2)
-            camera.position.x = camera.viewportWidth / 2;
-        if (camera.position.y > map.getHeight_inPixels() - camera.viewportHeight / 2)
-            camera.position.y = map.getHeight_inPixels() - camera.viewportHeight / 2;
-        if (camera.position.y < camera.viewportHeight / 2)
-            camera.position.y = camera.viewportHeight / 2;
+        if (map != null && flags.contains(LevelFlags.LimitCameraToMapBorders)) {
+            if (camera.position.x > map.getWidth_inPixels() - camera.viewportWidth / 2)
+                camera.position.x = map.getWidth_inPixels() - camera.viewportWidth / 2;
+            if (camera.position.x < camera.viewportWidth / 2)
+                camera.position.x = camera.viewportWidth / 2;
+            if (camera.position.y > map.getHeight_inPixels() - camera.viewportHeight / 2)
+                camera.position.y = map.getHeight_inPixels() - camera.viewportHeight / 2;
+            if (camera.position.y < camera.viewportHeight / 2)
+                camera.position.y = camera.viewportHeight / 2;
+        }
 
         // Update camera matrix
         camera.update();
@@ -480,29 +480,28 @@ public abstract class LevelBase implements GestureListener {
 
         batch.end();
 
+        //render Tiled-Map
         map.render(camera);
 
         //update ashley systems
         ashleyEngine.update(deltaTime());
 
         //render Box2D lights
-        if (enableLights) {
+        if (flags.contains(LevelFlags.EnableLighting)) {
             rayHandler.setCombinedMatrix(camera.combined.cpy().scale(engine.getConfig().ppm, engine.getConfig().ppm, 1f));
             rayHandler.updateAndRender();
         }
 
-        //render Box2D physics debug info
-        if (debugPhysics)
-            debugRenderer.render(world, camera);
-
-        uiStage.setDebugAll(debugUI);
-
         //render & Update UI
+        uiStage.setDebugAll(flags.contains(LevelFlags.DrawUIDebug));
         uiStage.draw();
 
+        //render Box2D physics debug info
+        if (flags.contains(LevelFlags.DrawPhysicsDebug))
+            debugRenderer.render(world, camera);
+
         //draw on-screen debug texts
-        if (osdVisible)
-            osd.render();
+        osd.render();
     }
 
     /**

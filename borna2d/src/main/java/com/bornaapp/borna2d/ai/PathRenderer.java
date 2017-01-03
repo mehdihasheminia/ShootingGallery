@@ -9,7 +9,8 @@ import java.util.Iterator;
 
 public class PathRenderer {
 
-    AStarGraph graph;
+    private Color color = Color.RED;
+    private AStarGraph graph;
     private ShapeRenderer shapeRenderer = new ShapeRenderer();
 
     public PathRenderer(AStarGraph _graph) {
@@ -27,7 +28,7 @@ public class PathRenderer {
             Vector2 p1 = graph.getNodeXY(node1);
 
             shapeRenderer.setProjectionMatrix(Engine.getInstance().getCurrentLevel().getCamera().combined);
-            shapeRenderer.setColor(Color.RED);
+            shapeRenderer.setColor(color);
             shapeRenderer.begin(ShapeRenderer.ShapeType.Filled);
             shapeRenderer.circle(p1.x, p1.y, 5);
             shapeRenderer.end();
