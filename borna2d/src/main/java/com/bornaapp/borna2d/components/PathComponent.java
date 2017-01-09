@@ -13,7 +13,7 @@ import com.bornaapp.borna2d.ai.Node;
 public class PathComponent extends Component {
 
     public AStarPath path;
-    private AStarGraph aStarGraph;
+    public AStarGraph aStarGraph;
 
     private Vector2 currentPosition;
     private Vector2 calculatedVelocity;
@@ -22,7 +22,6 @@ public class PathComponent extends Component {
     private float reachTolerance = 8.0f;
 
     private int currentNodeIndex = 0;
-    public boolean drawDebug = false;
 
     //private constructor, as components must be created
     //using Ashley Engine and initialize afterwards.

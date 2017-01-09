@@ -10,6 +10,7 @@ import com.badlogic.gdx.physics.box2d.Body;
 import com.badlogic.gdx.physics.box2d.BodyDef;
 import com.badlogic.gdx.physics.box2d.Fixture;
 import com.badlogic.gdx.utils.Timer;
+import com.bornaapp.borna2d.Debug.log;
 import com.bornaapp.borna2d.PlayStatus;
 import com.bornaapp.borna2d.components.AnimationComponent;
 import com.bornaapp.borna2d.components.BodyComponent;
@@ -181,12 +182,12 @@ public abstract class Duck {
                     Spin();
             }
             //Movement
-            elapsedTime += Engine.getInstance().getCurrentLevel().deltaTime();
+            float dt = Engine.getInstance().getCurrentLevel().deltaTime();
+            elapsedTime += dt;
             Vector2 pos = bodyComp.getPositionOfCenter_inPixels();
-            pos.x += linearVelocity;
+            pos.x += linearVelocity * dt;
             pos.y = LineY + MathUtils.sin(oscillationSpeed * elapsedTime * MathUtils.PI) * oscillationRadius;
             bodyComp.setPositionOfCenter_inPixels(pos.x, pos.y);
-            //
         }
     }
 

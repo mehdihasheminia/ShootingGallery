@@ -10,7 +10,7 @@ public class DesktopLauncher {
 		config.title = "Shooting Galley";
 		config.width = 1280;
 		config.height = 720;
-		config.foregroundFPS = 60;
+		config.foregroundFPS = 0;
 		config.backgroundFPS = -1;
 		config.vSyncEnabled = false;
 		new LwjglApplication(new game(), config);

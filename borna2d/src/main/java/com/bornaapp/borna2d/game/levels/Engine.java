@@ -181,7 +181,7 @@ public final class Engine {
 
     public void render() {
         try {
-            currentLevel.Render(Gdx.graphics.getDeltaTime());
+            currentLevel.Render();
         } catch (Exception e) {
             log.error(e.getMessage());
         }
@@ -231,14 +231,16 @@ public final class Engine {
     //region Utilities
     public double getJavaHeap() {
         // The heap memory is the memory allocated to the java process
-        // from bytes to MegaBytes by division to Math.pow(2.0, 20);
-        return ((double)Gdx.app.getJavaHeap() / 1048576d);
+        // this method returned memory used from java heap in MB
+        // (from bytes to MegaBytes by division to Math.pow(2.0, 20) )
+        return ((double) Gdx.app.getJavaHeap() / 1048576d);
     }
 
     public double getNativeHeap() {
         // The native memory is the memory available to the OS
-        // from bytes to MegaBytes by division to Math.pow(2.0, 20);
-        return (Gdx.app.getNativeHeap() / 1048576d);
+        // this method returned memory used from java heap in MB
+        // (from bytes to MegaBytes by division to Math.pow(2.0, 20) )
+        return ((double) Gdx.app.getNativeHeap() / 1048576d);
     }
 
     public int ScreenWidth() {

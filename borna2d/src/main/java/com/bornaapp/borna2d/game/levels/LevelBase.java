@@ -14,11 +14,15 @@ import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.Body;
 import com.badlogic.gdx.physics.box2d.World;
 import com.badlogic.gdx.scenes.scene2d.Stage;
+import com.badlogic.gdx.utils.Array;
+import com.badlogic.gdx.utils.TimeUtils;
 import com.badlogic.gdx.utils.viewport.ExtendViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
 import com.bornaapp.borna2d.Debug.OnScreenDisplay;
 import com.bornaapp.borna2d.Flags;
+import com.bornaapp.borna2d.Debug.PathRenderer;
 import com.bornaapp.borna2d.asset.Assets;
+import com.bornaapp.borna2d.components.PathComponent;
 import com.bornaapp.borna2d.game.maps.Map;
 import com.bornaapp.borna2d.game.maps.OrthogonalMap;
 import com.bornaapp.borna2d.graphics.Background;
@@ -75,12 +79,18 @@ public abstract class LevelBase implements GestureListener {
     private PathFindingSystem pathFindingSystem;
     private RenderingSystem renderingSystem;
     private SoundSystem soundSystem;
+    private PathRenderer pathRenderer;
     int systemPriority;
     int defaultZ = 0;
 
     InputMultiplexer multiplexer;
 
     public OnScreenDisplay osd = new OnScreenDisplay();
+
+    private float frameDuration = 1.0f / 60.0f; // 1/frameRate
+    private float deltaTime = 0f;
+    private final float NANOS_IN_SECOND = 1.0E9f;
+    private long lastTime = (long) (frameDuration * NANOS_IN_SECOND);
 
     //region Constructor
 
@@ -154,7 +164,7 @@ public abstract class LevelBase implements GestureListener {
     }
 
     private void DrawProgressCircle(float progress) {
-
+        ClearScreen();
         //Circle position and size
         float x = engine.ScreenWidth() / 2;
         float y = engine.ScreenHeight() / 2;
@@ -171,6 +181,63 @@ public abstract class LevelBase implements GestureListener {
         shapeRenderer.end();
     }
 
+    private void UpdateGraphics() {
+        ClearScreen();
+
+        if (!paused) {
+            //Use default shader
+            batch.setShader(null);
+        } else {
+            //Use black & white shader
+            batch.setShader(GrayscaleShader.shader);
+        }
+
+        // Update camera matrix
+        camera.update();
+        batch.setProjectionMatrix(camera.combined);
+        shapeRenderer.setProjectionMatrix(camera.combined);
+
+        //start batch rendering
+        if (batch.isDrawing())
+            batch.end();
+        batch.begin();
+
+        //render background Layer
+        if (background != null)
+            background.render();
+
+        if (parallax != null)
+            parallax.render(deltaTime());
+
+        batch.end();
+
+        //render Tiled-Map
+        map.render(camera);
+
+        //update ashley systems
+        ashleyEngine.update(deltaTime());
+
+        //render Box2D lights
+        if (flags.contains(LevelFlags.EnableLighting)) {
+            rayHandler.setCombinedMatrix(camera.combined.cpy().scale(engine.getConfig().ppm, engine.getConfig().ppm, 1f));
+            rayHandler.updateAndRender();
+        }
+
+        //render & Update UI
+        uiStage.setDebugAll(flags.contains(LevelFlags.DrawUIDebug));
+        uiStage.draw();
+
+        if (flags.contains(LevelFlags.DrawPathDebug))
+            RenderPathDebug();
+
+        //render Box2D physics debug info
+        if (flags.contains(LevelFlags.DrawPhysicsDebug))
+            debugRenderer.render(world, camera);
+
+        //draw on-screen debug texts
+        osd.render();
+    }
+
     //endregion
 
     //region Physics
@@ -179,10 +246,25 @@ public abstract class LevelBase implements GestureListener {
         return world;
     }
 
-    private void SetupPhysicsWorld() {
+    private void SetupPhysics() {
         world = new World(engine.getConfig().gravity, false);
         world.setContactListener(new CollisionListener());
         killList = new ArrayList<Body>();
+    }
+
+    private void UpdatePhysics() {
+        if (!paused) {
+            //update box2d physics world
+            world.step(frameDuration, 8, 3);
+
+            //removing unused bodies from the world
+//            if (!killList.isEmpty()) {
+//                for (int i = 0; i < killList.size(); i++) {
+//                    world.destroyBody(killList.get(i));
+//                    killList.remove(i);
+//                }
+//            }
+        }
     }
 
     public void AddToKillList(Body body) {
@@ -210,7 +292,7 @@ public abstract class LevelBase implements GestureListener {
     //endregion
 
     //region Ashley
-    private void SetupAshley(){
+    private void SetupAshley() {
         ashleyEngine = new PooledEngine();
 
         pathFindingSystem = new PathFindingSystem(this);
@@ -220,6 +302,18 @@ public abstract class LevelBase implements GestureListener {
         ashleyEngine.addSystem(pathFindingSystem);
         ashleyEngine.addSystem(renderingSystem);
         ashleyEngine.addSystem(soundSystem);
+        pathRenderer = new PathRenderer();
+    }
+
+    private void RenderPathDebug() {
+        Array<PathComponent> pathComponents = pathFindingSystem.getPathComponents();
+        for (PathComponent component : pathComponents) {
+            try {
+                pathRenderer.drawPath(component.aStarGraph, component.path);
+            } catch (Exception e) {
+                log.error(e.getMessage());
+            }
+        }
     }
 
     public PooledEngine getAshleyEngine() {
@@ -242,6 +336,24 @@ public abstract class LevelBase implements GestureListener {
         multiplexer.addProcessor(_uiStage);
         multiplexer.addProcessor(new GestureDetector(this));
         Gdx.input.setInputProcessor(multiplexer);
+    }
+
+    private void UpdateUserInput() {
+        if (!paused) {
+            // run-time user updates while game is running
+            try {
+                onUpdate();
+            } catch (Exception e) {
+                log.error(e.getMessage());
+            }
+        } else {
+            // run-time user updates while game is paused
+            try {
+                onPause();
+            } catch (Exception e) {
+                log.error(e.getMessage());
+            }
+        }
     }
     //endregion
 
@@ -324,7 +436,7 @@ public abstract class LevelBase implements GestureListener {
         if (isLoadingInProgress)
             return;
 
-        SetupPhysicsWorld();
+        SetupPhysics();
         SetupLights(world);
         SetupAshley();
         SetupInputs(uiStage);
@@ -404,9 +516,8 @@ public abstract class LevelBase implements GestureListener {
      * Package private:
      * must only get called by engine in response to applicationListener needs
      */
-    void Render(float delta) {
 
-        ClearScreen();
+    void Render() {
 
         //continue loading assets if any
         if (!created) {
@@ -415,93 +526,23 @@ public abstract class LevelBase implements GestureListener {
             return;
         }
 
-        if (!paused) {
-            //update box2d physics world
-            world.step(0.016f, 6, 2); //uses 60fps instead of deltaTime
+        // collect user input & draw graphics when ever you can
+        UpdateUserInput();
+        UpdateGraphics();
 
-            //removing unused bodies from the world
-//            if (!killList.isEmpty()) {
-//                for (int i = 0; i < killList.size(); i++) {
-//                    world.destroyBody(killList.get(i));
-//                    killList.remove(i);
-//                }
-//            }
+        // timing
+        deltaTime = ((float) TimeUtils.timeSinceNanos(lastTime)) / NANOS_IN_SECOND;
 
-            // run-time user updates while game is running
-            try {
-                onUpdate();
-            } catch (Exception e) {
-                log.error(e.getMessage());
-            }
+        if (deltaTime < frameDuration)
+            return;
+        else
+            deltaTime = frameDuration;
 
-            //Use default shader
-            batch.setShader(null);
+        // update physics only when it's time
+        UpdatePhysics();
 
-        } else {
-            // run-time user updates while game is paused
-            try {
-                onPause();
-            } catch (Exception e) {
-                log.error(e.getMessage());
-            }
-
-            //Use black & white shader
-            batch.setShader(GrayscaleShader.shader);
-        }
-
-        //Limit camera to map borders
-        if (map != null && flags.contains(LevelFlags.LimitCameraToMapBorders)) {
-            if (camera.position.x > map.getWidth_inPixels() - camera.viewportWidth / 2)
-                camera.position.x = map.getWidth_inPixels() - camera.viewportWidth / 2;
-            if (camera.position.x < camera.viewportWidth / 2)
-                camera.position.x = camera.viewportWidth / 2;
-            if (camera.position.y > map.getHeight_inPixels() - camera.viewportHeight / 2)
-                camera.position.y = map.getHeight_inPixels() - camera.viewportHeight / 2;
-            if (camera.position.y < camera.viewportHeight / 2)
-                camera.position.y = camera.viewportHeight / 2;
-        }
-
-        // Update camera matrix
-        camera.update();
-        batch.setProjectionMatrix(camera.combined);
-        shapeRenderer.setProjectionMatrix(camera.combined);
-
-        //start batch rendering
-        if (batch.isDrawing())
-            batch.end();
-        batch.begin();
-
-        //render background Layer
-        if (background != null)
-            background.render();
-
-        if (parallax != null)
-            parallax.render(delta);
-
-        batch.end();
-
-        //render Tiled-Map
-        map.render(camera);
-
-        //update ashley systems
-        ashleyEngine.update(deltaTime());
-
-        //render Box2D lights
-        if (flags.contains(LevelFlags.EnableLighting)) {
-            rayHandler.setCombinedMatrix(camera.combined.cpy().scale(engine.getConfig().ppm, engine.getConfig().ppm, 1f));
-            rayHandler.updateAndRender();
-        }
-
-        //render & Update UI
-        uiStage.setDebugAll(flags.contains(LevelFlags.DrawUIDebug));
-        uiStage.draw();
-
-        //render Box2D physics debug info
-        if (flags.contains(LevelFlags.DrawPhysicsDebug))
-            debugRenderer.render(world, camera);
-
-        //draw on-screen debug texts
-        osd.render();
+        // timing
+        lastTime = TimeUtils.nanoTime();
     }
 
     /**
@@ -586,12 +627,20 @@ public abstract class LevelBase implements GestureListener {
 
     //region Utilities
 
-    public float deltaTime() {
-        return (paused ? 0f : Gdx.graphics.getDeltaTime());
-    }
-
     public String getName() {
         return this.getClass().getSimpleName();
+    }
+
+    public float deltaTime() {
+        return (paused ? 0f : deltaTime);
+    }
+
+    public long getLoadingTime() {
+        return 0;
+    }
+
+    public long getRenderingTime() {
+        return 0;
     }
 
     //endregion

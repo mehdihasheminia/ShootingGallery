@@ -124,20 +124,10 @@ public class Bee {
                 destinations.reverse();
             }
         }
-
-
     }
 
     public void addCheckPoint(Vector2 checkpoint) {
         destinations.add(checkpoint);
-    }
-
-    public boolean isDrawDebug() {
-        return pathComp.drawDebug;
-    }
-
-    public void setDrawDebug(boolean drawDebug) {
-        this.pathComp.drawDebug = drawDebug;
     }
 
     public void setDebgColor(Color debgColor) {

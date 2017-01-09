@@ -11,8 +11,8 @@ package com.bornaapp.borna2d.game.levels;
  */
 public enum LevelFlags {
     DrawPhysicsDebug,
+    DrawPathDebug,
     DrawUIDebug,
     EnableLighting,
-    LimitCameraToMapBorders,
     LoadProgressively
 }

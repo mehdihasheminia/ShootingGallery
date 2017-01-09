@@ -3,11 +3,11 @@ package com.bornaapp.borna2d.systems;
 import com.badlogic.ashley.core.ComponentMapper;
 import com.badlogic.ashley.core.Entity;
 import com.badlogic.ashley.core.Family;
+import com.badlogic.ashley.core.PooledEngine;
 import com.badlogic.ashley.systems.IteratingSystem;
 import com.badlogic.ashley.utils.ImmutableArray;
 import com.badlogic.gdx.utils.Array;
-import com.bornaapp.borna2d.ai.AStarPath;
-import com.bornaapp.borna2d.ai.PathRenderer;
+import com.bornaapp.borna2d.Debug.PathRenderer;
 import com.bornaapp.borna2d.components.PathComponent;
 import com.bornaapp.borna2d.game.levels.Engine;
 import com.bornaapp.borna2d.game.levels.LevelBase;
@@ -38,9 +38,6 @@ public class PathFindingSystem extends IteratingSystem {
 
         if (pathComp.isPathValid()) {
             //
-            if (pathComp.drawDebug)
-                RenderDebug(pathComp.path);
-            //
             if (pathComp.reachedDestination()) {
                 //
                 pathComp.cancelDestination();
@@ -56,14 +53,20 @@ public class PathFindingSystem extends IteratingSystem {
         sync.setVelocity(entity, pathComp.getVelocity());
     }
 
-    private void RenderDebug(AStarPath path) {
-        try {
-            pathRenderer.drawPath(path);
-        } catch (Exception e) {
-            log.error(e.getMessage());
+    public Array<PathComponent> getPathComponents() {
+        //get all entities having path component
+        PooledEngine ashleyEngine = Engine.getInstance().getCurrentLevel().getAshleyEngine();
+        Family family = Family.all(PathComponent.class).get();
+        ImmutableArray<Entity> entities = ashleyEngine.getEntitiesFor(family);
+        //filling the path array
+        Array<PathComponent> pathArray = new Array<PathComponent>();
+        for (Entity entity : entities) {
+            try {
+                pathArray.add(pathMap.get(entity));
+            } catch (Exception e) {
+                log.error(e.getMessage());
+            }
         }
+        return pathArray;
     }
-
-//    public Array<AStarPath> getAllPath() {
-//    }
 }

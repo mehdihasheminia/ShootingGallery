@@ -41,9 +41,6 @@ public class OnScreenDisplay implements iDispose {
         }
     }
 
-    public OnScreenDisplay() {
-    }
-
     public void Init() {
         //Use LibGDX's default Arial font.
         font.getRegion().getTexture().setFilter(Texture.TextureFilter.Linear, Texture.TextureFilter.Linear);
@@ -53,34 +50,7 @@ public class OnScreenDisplay implements iDispose {
         camera = Engine.getInstance().getCurrentLevel().getCamera();
     }
 
-    public void log(String title, int value) {
-        log(title, Integer.toString(value));
-    }
-
-    public void log(String title, float value) {
-        log(title, Float.toString(value));
-    }
-
-    public void log(String title, Vector2 value) {
-        log(title, "[" + Float.toString(value.x) + ", " + Float.toString(value.y) + "]");
-    }
-
-    public void log(String title) {
-        log(title, "");
-    }
-
-    public void log(String title, String value) {
-        //prevents adding repetitive logs
-        //instead updates existing logs
-        for (LogData data : logList) {
-            if (data.title.equals(title)) {
-                data.value = value;
-                return;
-            }
-        }
-        //saves all requested logs in an array
-        logList.add(new LogData(title, value));
-    }
+    //region private methods
 
     private void DrawLogs() {
         try {
@@ -152,6 +122,37 @@ public class OnScreenDisplay implements iDispose {
         if (newOffest < 0)
             posCorrectionX = 0;
     }
+    //endregion
+
+    //region public methods
+    public void log(String title, int value) {
+        log(title, Integer.toString(value));
+    }
+
+    public void log(String title, float value) {
+        log(title, Float.toString(value));
+    }
+
+    public void log(String title, Vector2 value) {
+        log(title, "[" + Float.toString(value.x) + ", " + Float.toString(value.y) + "]");
+    }
+
+    public void log(String title) {
+        log(title, "");
+    }
+
+    public void log(String title, String value) {
+        //prevents adding repetitive logs
+        //instead updates existing logs
+        for (LogData data : logList) {
+            if (data.title.equals(title)) {
+                data.value = value;
+                return;
+            }
+        }
+        //saves all requested logs in an array
+        logList.add(new LogData(title, value));
+    }
 
     public void render() {
         try {
@@ -185,4 +186,5 @@ public class OnScreenDisplay implements iDispose {
     public void setFontScale(float scale) {
         font.getData().setScale(scale);
     }
+    //endregion
 }
