@@ -27,6 +27,7 @@ import java.util.Comparator;
 public class RenderingSystem extends IteratingSystem {
 
     Sync sync;
+    SpriteBatch batch = Engine.getInstance().getCurrentLevel().getBatch();
     private Array<Entity> renderQueue;
 
     private ComponentMapper<ParticleComponent> particleMap;
@@ -127,7 +128,6 @@ public class RenderingSystem extends IteratingSystem {
         boolean flipY = texComp.flipY;
 
         //draw texture
-        SpriteBatch batch = Engine.getInstance().getCurrentLevel().getBatch();
         batch.draw(texComp.texture, x, y, originX, originY, w, h, scaleX, scaleY, rot, texOffsetX, texOffsetY, texW, texH, flipX, flipY);
     }
 
@@ -177,7 +177,6 @@ public class RenderingSystem extends IteratingSystem {
         flipX = texComp.flipX;
         flipY = texComp.flipY;
 
-        SpriteBatch batch = Engine.getInstance().getCurrentLevel().getBatch();
         batch.draw(region.getTexture(), x, y, originX, originY, w, h, scaleX, scaleY, rot, texOffsetX, texOffsetY, texW, texH, flipX, flipY);
     }
 

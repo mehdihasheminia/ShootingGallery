@@ -15,7 +15,6 @@ import com.badlogic.gdx.physics.box2d.Body;
 import com.badlogic.gdx.physics.box2d.World;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.utils.Array;
-import com.badlogic.gdx.utils.TimeUtils;
 import com.badlogic.gdx.utils.viewport.ExtendViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
 import com.bornaapp.borna2d.Debug.OnScreenDisplay;
@@ -65,7 +64,7 @@ public abstract class LevelBase implements GestureListener {
     public Background background;
     public ParallaxBackground parallax;
 
-    private Map map = new OrthogonalMap();
+    public Map map;
 
     public Stage uiStage;
 
@@ -78,7 +77,7 @@ public abstract class LevelBase implements GestureListener {
     private PooledEngine ashleyEngine;
     private PathFindingSystem pathFindingSystem;
     private RenderingSystem renderingSystem;
-    private SoundSystem soundSystem;
+    private SoundSystem soundSystem; //<-----temporarily is not being updated
     private PathRenderer pathRenderer;
     int systemPriority;
     int defaultZ = 0;
@@ -87,10 +86,8 @@ public abstract class LevelBase implements GestureListener {
 
     public OnScreenDisplay osd = new OnScreenDisplay();
 
-    private float frameDuration = 1.0f / 60.0f; // 1/frameRate
-    private float deltaTime = 0f;
-    private final float NANOS_IN_SECOND = 1.0E9f;
-    private long lastTime = (long) (frameDuration * NANOS_IN_SECOND);
+    private float frameDuration = 1.0f / 60.0f; // desired frame duration : 1/frameRate
+    private float accumulator = 0f;
 
     //region Constructor
 
@@ -182,15 +179,13 @@ public abstract class LevelBase implements GestureListener {
     }
 
     private void UpdateGraphics() {
+
         ClearScreen();
 
-        if (!paused) {
-            //Use default shader
-            batch.setShader(null);
-        } else {
-            //Use black & white shader
-            batch.setShader(GrayscaleShader.shader);
-        }
+        if (!paused)
+            batch.setShader(null);                  //Use default shader
+        else
+            batch.setShader(GrayscaleShader.shader);//Use black & white shader
 
         // Update camera matrix
         camera.update();
@@ -212,10 +207,11 @@ public abstract class LevelBase implements GestureListener {
         batch.end();
 
         //render Tiled-Map
-        map.render(camera);
+        if (map != null)
+            map.render(camera);
 
         //update ashley systems
-        ashleyEngine.update(deltaTime());
+        renderingSystem.update(deltaTime());
 
         //render Box2D lights
         if (flags.contains(LevelFlags.EnableLighting)) {
@@ -227,6 +223,7 @@ public abstract class LevelBase implements GestureListener {
         uiStage.setDebugAll(flags.contains(LevelFlags.DrawUIDebug));
         uiStage.draw();
 
+        //render PathFinding debug info
         if (flags.contains(LevelFlags.DrawPathDebug))
             RenderPathDebug();
 
@@ -252,8 +249,10 @@ public abstract class LevelBase implements GestureListener {
         killList = new ArrayList<Body>();
     }
 
-    private void UpdatePhysics() {
+    private void UpdatePhysicsAndPath() {
         if (!paused) {
+
+            pathFindingSystem.update(deltaTime()); //todo: doesn't work with very low frame rates!
             //update box2d physics world
             world.step(frameDuration, 8, 3);
 
@@ -516,7 +515,6 @@ public abstract class LevelBase implements GestureListener {
      * Package private:
      * must only get called by engine in response to applicationListener needs
      */
-
     void Render() {
 
         //continue loading assets if any
@@ -526,23 +524,15 @@ public abstract class LevelBase implements GestureListener {
             return;
         }
 
-        // collect user input & draw graphics when ever you can
+        accumulator += deltaTime();
+
+        while (accumulator >= frameDuration) {
+            UpdatePhysicsAndPath();
+            accumulator -= frameDuration;
+        }
+
         UpdateUserInput();
         UpdateGraphics();
-
-        // timing
-        deltaTime = ((float) TimeUtils.timeSinceNanos(lastTime)) / NANOS_IN_SECOND;
-
-        if (deltaTime < frameDuration)
-            return;
-        else
-            deltaTime = frameDuration;
-
-        // update physics only when it's time
-        UpdatePhysics();
-
-        // timing
-        lastTime = TimeUtils.nanoTime();
     }
 
     /**
@@ -632,7 +622,7 @@ public abstract class LevelBase implements GestureListener {
     }
 
     public float deltaTime() {
-        return (paused ? 0f : deltaTime);
+        return (paused ? 0f : Gdx.graphics.getRawDeltaTime());
     }
 
     public long getLoadingTime() {

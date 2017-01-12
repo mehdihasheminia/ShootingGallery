@@ -44,10 +44,10 @@ public class PathFindingSystem extends IteratingSystem {
                 //
             } else {
                 //
-                if (!pathComp.reachedTargetNode())
-                    pathComp.CalculateVelocityToTargetNode(deltaTime);
-                else
+                if (pathComp.reachedTargetNode())
                     pathComp.gotoNextNode();
+                else
+                    pathComp.CalculateVelocityToTargetNode(deltaTime);
             }
         }
         sync.setVelocity(entity, pathComp.getVelocity());
