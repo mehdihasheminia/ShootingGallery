@@ -13,7 +13,9 @@ import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.Body;
 import com.badlogic.gdx.physics.box2d.World;
+import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.Stage;
+import com.badlogic.gdx.scenes.scene2d.Touchable;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.viewport.ExtendViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
@@ -23,7 +25,6 @@ import com.bornaapp.borna2d.Debug.PathRenderer;
 import com.bornaapp.borna2d.asset.Assets;
 import com.bornaapp.borna2d.components.PathComponent;
 import com.bornaapp.borna2d.game.maps.Map;
-import com.bornaapp.borna2d.game.maps.OrthogonalMap;
 import com.bornaapp.borna2d.graphics.Background;
 import com.bornaapp.borna2d.graphics.GrayscaleShader;
 import com.bornaapp.borna2d.graphics.ParallaxBackground;
@@ -55,7 +56,8 @@ public abstract class LevelBase implements GestureListener {
     public Assets assets = new Assets();
 
     private OrthographicCamera camera;
-    private Viewport viewport;
+    private ExtendViewport viewport;
+    private TargetResolution targetResolution;
 
     public Color backColor = Color.DARK_GRAY;
     final private SpriteBatch batch = new SpriteBatch();
@@ -65,8 +67,6 @@ public abstract class LevelBase implements GestureListener {
     public ParallaxBackground parallax;
 
     public Map map;
-
-    public Stage uiStage;
 
     private World world;
     private ArrayList<Body> killList;
@@ -81,6 +81,10 @@ public abstract class LevelBase implements GestureListener {
     private PathRenderer pathRenderer;
     int systemPriority;
     int defaultZ = 0;
+
+    boolean dialogVisible = false;
+    public Stage dialogUIStage;
+    public Stage baseUIStage;
 
     InputMultiplexer multiplexer;
 
@@ -220,8 +224,11 @@ public abstract class LevelBase implements GestureListener {
         }
 
         //render & Update UI
-        uiStage.setDebugAll(flags.contains(LevelFlags.DrawUIDebug));
-        uiStage.draw();
+        baseUIStage.setDebugAll(flags.contains(LevelFlags.DrawUIDebug));
+        dialogUIStage.setDebugAll(flags.contains(LevelFlags.DrawUIDebug));
+        baseUIStage.draw();
+        if(dialogVisible)
+            dialogUIStage.draw();
 
         //render PathFinding debug info
         if (flags.contains(LevelFlags.DrawPathDebug))
@@ -284,7 +291,7 @@ public abstract class LevelBase implements GestureListener {
 
     //region Tiled-map
 
-    public com.bornaapp.borna2d.game.maps.Map getMap() {
+    public Map getMap() {
         return this.map;
     }
 
@@ -330,14 +337,35 @@ public abstract class LevelBase implements GestureListener {
 
     //region Input management
 
-    private void SetupInputs(Stage _uiStage) {
+    private void SetupInputs(Stage _baseStage, Stage _dialogStage) {
         multiplexer = new InputMultiplexer();
-        multiplexer.addProcessor(_uiStage);
+        multiplexer.addProcessor(_baseStage);
+        multiplexer.addProcessor(_dialogStage);
         multiplexer.addProcessor(new GestureDetector(this));
         Gdx.input.setInputProcessor(multiplexer);
     }
 
     private void UpdateUserInput() {
+        //Checks if a dialog is open
+        dialogVisible = false;
+        for (Actor actor : dialogUIStage.getActors()) {
+            if (actor.isVisible()) {
+                dialogVisible = true;
+                break;
+            }
+        }
+        //depending on dialog appearance, enable/disable base UI
+        if (dialogVisible) {
+            for (Actor actor : baseUIStage.getActors()) {
+                actor.setTouchable(Touchable.disabled);
+            }
+
+        } else {
+            for (Actor actor : baseUIStage.getActors()) {
+                actor.setTouchable(Touchable.enabled);
+            }
+        }
+
         if (!paused) {
             // run-time user updates while game is running
             try {
@@ -369,13 +397,16 @@ public abstract class LevelBase implements GestureListener {
         // a viewport manages the method the camera uses to map any point in world space to camera space.
         // As we resize the window, viewport width and height remains constant and scales the rendering content
         // to match the new window Width and Height.
-        viewport = new ExtendViewport(engine.ScreenWidth(), engine.ScreenHeight(), _camera);
+
+        targetResolution = new TargetResolution(Device.SamsungGalaxyJ7_J5_A5_A3_S3);
+
+        viewport = new ExtendViewport(targetResolution.width, targetResolution.height, 0, 0, _camera);
         viewport.apply(true);
-        viewport.update(engine.ScreenWidth(), engine.ScreenHeight());
     }
 
     private void SetupUIStage(Viewport _viewport) {
-        uiStage = new Stage(_viewport);
+        baseUIStage = new Stage(_viewport);
+        dialogUIStage = new Stage(_viewport);
     }
 
     public OrthographicCamera getCamera() {
@@ -438,7 +469,7 @@ public abstract class LevelBase implements GestureListener {
         SetupPhysics();
         SetupLights(world);
         SetupAshley();
-        SetupInputs(uiStage);
+        SetupInputs(baseUIStage, dialogUIStage);
         osd.Init();
 
         try {
@@ -624,14 +655,5 @@ public abstract class LevelBase implements GestureListener {
     public float deltaTime() {
         return (paused ? 0f : Gdx.graphics.getRawDeltaTime());
     }
-
-    public long getLoadingTime() {
-        return 0;
-    }
-
-    public long getRenderingTime() {
-        return 0;
-    }
-
     //endregion
 }

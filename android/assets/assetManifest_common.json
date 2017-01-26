@@ -6,7 +6,9 @@
     "textures/resumeBtn.atlas",
     "textures/restartBtn.atlas",
     "textures/exitBtn.atlas",
-    "textures/ContinueBtn.atlas"
+    "textures/ContinueBtn.atlas",
+    "textures/okBtn.atlas",
+    "textures/cancelBtn.atlas"
 ],
 
 "images": [

@@ -3,11 +3,14 @@
 "textures": [
     "textures/PlayBtn.atlas",
     "textures/settingsBtn.atlas",
-    "textures/shareBtn.atlas"
+    "textures/shareBtn.atlas",
+    "textures/aboutBtn.atlas",
+    "textures/emailBtn.atlas",
 ],
 
 "images": [
-    "images/EntryMenu-bg.png"
+    "images/EntryMenu-bg.png",
+    "images/aboutTable.png"
 ]
 
 }

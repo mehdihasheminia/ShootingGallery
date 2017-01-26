@@ -24,7 +24,7 @@ public class LifeCounter {
         image = new Image(new TextureRegion(Engine.getInstance().getCurrentLevel().assets.getTexture("LifeBar.png")));
 
         //---------------------------Layout Table ------------------------------
-        Engine.getInstance().getCurrentLevel().uiStage.addActor(table);
+        Engine.getInstance().getCurrentLevel().baseUIStage.addActor(table);
 
         final Drawable tblBackground = new TextureRegionDrawable(new TextureRegion(Engine.getInstance().getCurrentLevel().assets.getTexture("LifeBox.png")));
         table.setBackground(tblBackground);

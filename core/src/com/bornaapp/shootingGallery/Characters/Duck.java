@@ -194,7 +194,7 @@ public abstract class Duck {
     public void Spin() {
         animComp.setPlayStatus(PlayStatus.Playing);
 
-        Timer timer = new Timer();
+        final Timer timer = new Timer();
         timer.scheduleTask(new Timer.Task() {
             @Override
             public void run() {

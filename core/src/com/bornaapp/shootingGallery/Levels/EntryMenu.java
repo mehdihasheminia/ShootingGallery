@@ -1,28 +1,34 @@
 package com.bornaapp.shootingGallery.Levels;
 
+import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.Input;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.ui.ImageButton;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener;
+import com.bornaapp.borna2d.Debug.osdFlag;
 import com.bornaapp.borna2d.game.levels.Engine;
 import com.bornaapp.borna2d.game.levels.LevelBase;
 import com.bornaapp.borna2d.game.levels.LevelFlags;
 import com.bornaapp.borna2d.graphics.Background;
+import com.bornaapp.shootingGallery.Controls.AboutDialog;
 
 public class EntryMenu extends LevelBase {
     public EntryMenu() {
         super("assetManifest_entryMenu.json");
-        flags.set(LevelFlags.LoadProgressively);
     }
+
+    Table table;
+    AboutDialog aboutDialog;
 
     @Override
     public void onCreate() {
 
-        background = new Background("EntryMenu-bg.png", true);
+        background = new Background("EntryMenu-bg.png", false);
 
-        //------------------------ Play Button ------------------------------
+        //---------------------------- Play Button -----------------------------------
         Skin playBtnSkin = new Skin();
         playBtnSkin.addRegions(assets.getTextureAtlas("PlayBtn.atlas"));
 
@@ -35,20 +41,33 @@ public class EntryMenu extends LevelBase {
             }
         });
 
-        //------------------------ Settings Button -----------------------------------
-        Skin settingsBtnSkin = new Skin();
-        settingsBtnSkin.addRegions(assets.getTextureAtlas("settingsBtn.atlas"));
+        //------------------------ Mute Button -----------------------------------
+        Skin muteBtnSkin = new Skin();
+        muteBtnSkin.addRegions(assets.getTextureAtlas("volumeBtn.atlas"));
 
-        ImageButton settingsBtn = new ImageButton(settingsBtnSkin.getDrawable("01settingsNormal"), settingsBtnSkin.getDrawable("02settingsClicked"));
+        ImageButton muteBtn = new ImageButton(muteBtnSkin.getDrawable("01Volume_on"), muteBtnSkin.getDrawable("02Volume_mute"), muteBtnSkin.getDrawable("02Volume_mute"));
 
-        settingsBtn.addListener(new ChangeListener() {
+        muteBtn.addListener(new ChangeListener() {
             @Override
             public void changed(ChangeEvent event, Actor actor) {
-                System.out.println("settings Button Pressed");
+                Engine.getInstance().mute = !Engine.getInstance().mute;
             }
         });
 
-        //---------------Share Button-----------------------------------
+        //------------------------ About Button -----------------------------------
+        Skin aboutBtnSkin = new Skin();
+        aboutBtnSkin.addRegions(assets.getTextureAtlas("aboutBtn.atlas"));
+
+        ImageButton aboutBtn = new ImageButton(aboutBtnSkin.getDrawable("0about_normal"), aboutBtnSkin.getDrawable("1about-clicked"));
+
+        aboutBtn.addListener(new ChangeListener() {
+            @Override
+            public void changed(ChangeEvent event, Actor actor) {
+                aboutDialog.setVisible(true);
+            }
+        });
+
+        //------------------------- Share Button -----------------------------------
         Skin shareBtnSkin = new Skin();
         shareBtnSkin.addRegions(assets.getTextureAtlas("shareBtn.atlas"));
 
@@ -57,22 +76,54 @@ public class EntryMenu extends LevelBase {
         shareBtn.addListener(new ChangeListener() {
             @Override
             public void changed(ChangeEvent event, Actor actor) {
-                System.out.println("share Button Pressed");
+                engine.platformSpecific.share();
             }
         });
 
-        //---------------------------Layout ------------------------------
-        Table table = new Table();
-        table.bottom();
-        table.setTransform(true);
-        table.setPosition(400, 10);
+        //------------------------- Support Button -----------------------------------
+        Skin supportBtnSkin = new Skin();
+        supportBtnSkin.addRegions(assets.getTextureAtlas("emailBtn.atlas"));
 
-        table.row().bottom();
-        table.add(settingsBtn).maxHeight(75);
-        table.add(playBtn).minHeight(75).prefHeight(120).padLeft(100).padRight(100);
-        table.add(shareBtn).maxHeight(75);
+        ImageButton supportBtn = new ImageButton(supportBtnSkin.getDrawable("0email_normal"), supportBtnSkin.getDrawable("1email_clicked"));
 
-        uiStage.addActor(table);
+        supportBtn.addListener(new ChangeListener() {
+            @Override
+            public void changed(ChangeEvent event, Actor actor) {
+                engine.platformSpecific.support();
+            }
+        });
+
+        //----------------------------- Layout ------------------------------------
+        table = new Table();
+        baseUIStage.addActor(table);
+
+        table.setFillParent(true);
+
+        // We use empty cells that expand through all available spaces for
+        // alignment. This may not provide similar results in different screen
+        // resolutions, but it is an extremely readable and clear piece of code
+
+        //top row
+        table.row();
+        table.add().expand();
+        table.add(muteBtn).bottom().left();
+        table.add().expand();
+        table.add(playBtn).bottom().minHeight(75f).prefHeight(120f);
+        table.add().expand();
+        table.add(shareBtn).bottom().right();
+        table.add().expand();
+        //bot row
+        table.row();
+        table.add();
+        table.add(aboutBtn).bottom().left();
+        table.add();
+        table.add();
+        table.add();
+        table.add(supportBtn).bottom().right();
+
+        //-------------- About Dialog ----------------------
+        aboutDialog = new AboutDialog();
+        aboutDialog.Init();
     }
 
     @Override
@@ -81,6 +132,27 @@ public class EntryMenu extends LevelBase {
 
     @Override
     public void onUpdate() {
+        //-------------------------- On-Screen Display --------------------
+        if (Gdx.input.isKeyJustPressed(Input.Keys.NUM_0))
+            flags.toggle(LevelFlags.DrawPhysicsDebug);
+
+        if (Gdx.input.isKeyJustPressed(Input.Keys.NUM_9))
+            flags.toggle(LevelFlags.DrawPathDebug);
+
+        if (Gdx.input.isKeyJustPressed(Input.Keys.NUM_8))
+            flags.toggle(LevelFlags.DrawUIDebug);
+
+        if (Gdx.input.isKeyJustPressed(Input.Keys.NUM_7))
+            flags.toggle(LevelFlags.EnableLighting);
+
+        if (Gdx.input.isKeyJustPressed(Input.Keys.NUM_1))
+            osd.flags.toggle(osdFlag.ShowLogs);
+
+        if (Gdx.input.isKeyJustPressed(Input.Keys.NUM_2))
+            osd.flags.toggle(osdFlag.ShowGrids);
+
+        if (Gdx.input.isKeyJustPressed(Input.Keys.NUM_3))
+            osd.flags.toggle(osdFlag.ShowMousePosition);
     }
 
     @Override

@@ -3,4 +3,12 @@
 
     <string name="app_name">ShootingGallery</string>
 
+    <string name="txt_share">سلام، من بازی غرفه تیراندازی را نصب کردم و به شما هم پیشنهاد میکنم</string>
+    <string name="txt_share_error">برنامه ای برای به اشتراک گذاری نصب نشده است</string>
+    <string name="txt_email_Address">bornaapp@gmail.com</string>
+    <string name="txt_email_subject">درخواست پشتیبانی فنی</string>
+    <string name="txt_email_message">لطفا مشکل فنی و روش تماس کارشناسان ما با خود را اینجا مشخص کنید</string>
+    <string name="txt_email_chooser">ارسال ایمیل</string>
+    <string name="txt_http_address">"https://cafebazaar.ir/developer/bornaapp/"</string>
+
 </resources>

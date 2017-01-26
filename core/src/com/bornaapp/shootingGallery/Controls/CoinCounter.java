@@ -32,7 +32,7 @@ public class CoinCounter {
         label = new Label("0",style);
 
         //---------------------------Layout Table ------------------------------
-        Engine.getInstance().getCurrentLevel().uiStage.addActor(table);
+        Engine.getInstance().getCurrentLevel().baseUIStage.addActor(table);
 
         final Drawable tblBackground = new TextureRegionDrawable(new TextureRegion(Engine.getInstance().getCurrentLevel().assets.getTexture("coinBox.png")));
         table.setBackground(tblBackground);

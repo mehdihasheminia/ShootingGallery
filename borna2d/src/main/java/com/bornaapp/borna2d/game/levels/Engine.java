@@ -6,6 +6,7 @@ import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Json;
 import com.badlogic.gdx.utils.JsonWriter;
 import com.bornaapp.borna2d.Debug.log;
+import com.bornaapp.borna2d.game.application.PlatformSpecific;
 
 /**
  * Engine class uses singleton pattern to Ensure it has
@@ -26,6 +27,8 @@ public final class Engine {
 
     private float masterVolume = 1.0f;
     public boolean mute = false;
+
+    public PlatformSpecific platformSpecific;
 
     //region Singleton construction & instantiation
 

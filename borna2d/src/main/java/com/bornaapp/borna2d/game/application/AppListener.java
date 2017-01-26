@@ -8,8 +8,9 @@ public abstract class AppListener implements ApplicationListener {
 
     Engine engine = Engine.getInstance();
 
-    public AppListener(){
+    public AppListener(PlatformSpecific _platformSpecific){
         //nothing in constructor!!! as Gdx is not initialized yet.
+        engine.platformSpecific = _platformSpecific;
     }
 
     protected abstract void setLevel();

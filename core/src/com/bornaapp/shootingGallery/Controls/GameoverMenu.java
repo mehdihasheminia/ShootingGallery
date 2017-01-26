@@ -49,7 +49,7 @@ public class GameoverMenu {
 
         //---------------------------Layout ------------------------------
         table.setVisible(false);
-        Engine.getInstance().getCurrentLevel().uiStage.addActor(table);
+        Engine.getInstance().getCurrentLevel().dialogUIStage.addActor(table);
 //        table.debugAll();
 
         final Drawable tblBackground = new TextureRegionDrawable(new TextureRegion(Engine.getInstance().getCurrentLevel().assets.getTexture("gameoverTable.png")));
