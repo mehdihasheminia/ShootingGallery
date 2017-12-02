@@ -66,8 +66,8 @@ public class Rifle {
         float x, y, w, h;
         w = 120f;
         h = 250f;
-        x = (Engine.getInstance().ScreenWidth()-w)/2f;
-        y = 0;
+        x = (Engine.getInstance().getCurrentLevel().getCamera().viewportWidth-w)/2f;
+        y = h/2;
         bodyComp.Init(BodyDef.BodyType.DynamicBody, new BoxDef(w, h), x, y, true, true);
         bodyComp.body.setGravityScale(0);
         entity.add(bodyComp);

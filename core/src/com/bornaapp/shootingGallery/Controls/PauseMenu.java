@@ -10,6 +10,7 @@ import com.badlogic.gdx.scenes.scene2d.utils.Drawable;
 import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
 import com.bornaapp.borna2d.Debug.log;
 import com.bornaapp.borna2d.game.levels.Engine;
+import com.bornaapp.borna2d.game.levels.LevelBase;
 import com.bornaapp.shootingGallery.Levels.EntryMenu;
 
 /**
@@ -18,12 +19,13 @@ import com.bornaapp.shootingGallery.Levels.EntryMenu;
 public class PauseMenu {
 
     Table table = new Table();
+    LevelBase currentLevel = Engine.getInstance().getCurrentLevel();
 
     public void Init() {
 
         //------------------------ Settings Button -----------------------------------
         Skin settingsBtnSkin = new Skin();
-        settingsBtnSkin.addRegions(Engine.getInstance().getCurrentLevel().assets.getTextureAtlas("settingsBtn.atlas"));
+        settingsBtnSkin.addRegions(currentLevel.assets.getTextureAtlas("settingsBtn.atlas"));
 
         ImageButton settingsBtn = new ImageButton(settingsBtnSkin.getDrawable("01settingsNormal"), settingsBtnSkin.getDrawable("02settingsClicked"));
 
@@ -36,7 +38,7 @@ public class PauseMenu {
 
         //------------------------ Volume Button -----------------------------------
         Skin volumeBtnSkin = new Skin();
-        volumeBtnSkin.addRegions(Engine.getInstance().getCurrentLevel().assets.getTextureAtlas("volumeBtn.atlas"));
+        volumeBtnSkin.addRegions(currentLevel.assets.getTextureAtlas("volumeBtn.atlas"));
 
         ImageButton volumeBtn = new ImageButton(volumeBtnSkin.getDrawable("01Volume_on"), volumeBtnSkin.getDrawable("02Volume_mute"), volumeBtnSkin.getDrawable("02Volume_mute"));
 
@@ -49,35 +51,35 @@ public class PauseMenu {
 
         //------------------------ Resume Button -----------------------------------
         Skin resumeBtnSkin = new Skin();
-        resumeBtnSkin.addRegions(Engine.getInstance().getCurrentLevel().assets.getTextureAtlas("resumeBtn.atlas"));
+        resumeBtnSkin.addRegions(currentLevel.assets.getTextureAtlas("resumeBtn.atlas"));
 
         ImageButton resumeBtn = new ImageButton(resumeBtnSkin.getDrawable("01ResumeNormal"), resumeBtnSkin.getDrawable("02ResumeClicked"));
 
         resumeBtn.addListener(new ChangeListener() {
             @Override
             public void changed(ChangeEvent event, Actor actor) {
-                Engine.getInstance().getCurrentLevel().Unpause();
+                currentLevel.Unpause();
                 setVisible(false);
             }
         });
 
         //------------------------ Restart Button -----------------------------------
         Skin restartBtnSkin = new Skin();
-        restartBtnSkin.addRegions(Engine.getInstance().getCurrentLevel().assets.getTextureAtlas("restartBtn.atlas"));
+        restartBtnSkin.addRegions(currentLevel.assets.getTextureAtlas("restartBtn.atlas"));
 
         ImageButton restartBtn = new ImageButton(restartBtnSkin.getDrawable("01RestartNormal"), restartBtnSkin.getDrawable("02RestartClicked"));
 
         restartBtn.addListener(new ChangeListener() {
             @Override
             public void changed(ChangeEvent event, Actor actor) {
-                Engine.getInstance().getCurrentLevel().RestartLevel();
+                currentLevel.RestartLevel();
                 setVisible(false);
             }
         });
 
         //------------------------ Exit Button -----------------------------------
         Skin exitBtnSkin = new Skin();
-        exitBtnSkin.addRegions(Engine.getInstance().getCurrentLevel().assets.getTextureAtlas("exitBtn.atlas"));
+        exitBtnSkin.addRegions(currentLevel.assets.getTextureAtlas("exitBtn.atlas"));
 
         ImageButton exitBtn = new ImageButton(exitBtnSkin.getDrawable("01exitNormal"), exitBtnSkin.getDrawable("02exitClicked"));
 
@@ -91,17 +93,17 @@ public class PauseMenu {
 
         //---------------------------Layout ------------------------------
         table.setVisible(false);
-        Engine.getInstance().getCurrentLevel().dialogUIStage.addActor(table);
+        currentLevel.dialogUIStage.addActor(table);
 //        table.debugAll();
 
-        final Drawable tblBackground = new TextureRegionDrawable(new TextureRegion(Engine.getInstance().getCurrentLevel().assets.getTexture("pauseTable.png")));
+        final Drawable tblBackground = new TextureRegionDrawable(new TextureRegion(currentLevel.assets.getTexture("pauseTable.png")));
         table.setBackground(tblBackground);
 
         table.setWidth(280);
         table.setHeight(400);
         table.setTransform(true);
-        float x = (Engine.getInstance().ScreenWidth() - table.getWidth()) / 2;
-        float y = (Engine.getInstance().ScreenHeight() - table.getHeight()) / 2;
+        float x = (currentLevel.getCamera().viewportWidth - table.getWidth()) / 2;
+        float y = (currentLevel.getCamera().viewportHeight - table.getHeight()) / 2;
         table.setPosition((x > 0 ? x : 0), (y > 0 ? y : 0));
 
         //Adding buttons to Table

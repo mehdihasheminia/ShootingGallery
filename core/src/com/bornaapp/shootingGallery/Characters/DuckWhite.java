@@ -2,6 +2,7 @@ package com.bornaapp.shootingGallery.Characters;
 
 import com.badlogic.gdx.math.Vector2;
 import com.bornaapp.borna2d.game.levels.Engine;
+import com.bornaapp.borna2d.game.levels.LevelBase;
 
 /**
  * Created by Hashemi on 12/22/2016.
@@ -14,6 +15,8 @@ public class DuckWhite extends Duck {
 
     @Override
     public void Init() {
+
+        LevelBase currentLevel = Engine.getInstance().getCurrentLevel();
 
         textPath = "duck_outline_white.atlas";
         scale = 1.0f;
@@ -38,7 +41,7 @@ public class DuckWhite extends Duck {
             headOffsetY = 45.0f;
             //
             linearVelocity = -30.0f;
-            startPosition = new Vector2(Engine.getInstance().ScreenWidth(), LineY);
+            startPosition = new Vector2(currentLevel.getCamera().viewportWidth, LineY);
             missX = -100f;
         } else {
             texOffsetX = -3.0f; //negative of flipped offset about x-axis
@@ -57,7 +60,7 @@ public class DuckWhite extends Duck {
             //
             linearVelocity = 30.0f; //negative of flipped speed about x-axis
             startPosition = new Vector2(0.0f, LineY);
-            missX = Engine.getInstance().ScreenWidth()+100f;
+            missX = currentLevel.getCamera().viewportWidth+100f;
         }
     }
 }

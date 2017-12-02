@@ -8,12 +8,18 @@ import com.badlogic.gdx.scenes.scene2d.ui.ImageButton;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener;
+import com.bornaapp.borna2d.Debug.log;
 import com.bornaapp.borna2d.Debug.osdFlag;
 import com.bornaapp.borna2d.game.levels.Engine;
 import com.bornaapp.borna2d.game.levels.LevelBase;
 import com.bornaapp.borna2d.game.levels.LevelFlags;
 import com.bornaapp.borna2d.graphics.Background;
 import com.bornaapp.shootingGallery.Controls.AboutDialog;
+
+import java.net.URL;
+import java.net.URLConnection;
+import java.util.Scanner;
+
 
 public class EntryMenu extends LevelBase {
     public EntryMenu() {
@@ -104,11 +110,11 @@ public class EntryMenu extends LevelBase {
         // resolutions, but it is an extremely readable and clear piece of code
 
         //top row
-        table.row();
+        table.row().padBottom(25);
         table.add().expand();
         table.add(muteBtn).bottom().left();
         table.add().expand();
-        table.add(playBtn).bottom().minHeight(75f).prefHeight(120f);
+        table.add(playBtn).bottom();
         table.add().expand();
         table.add(shareBtn).bottom().right();
         table.add().expand();

@@ -167,8 +167,8 @@ public abstract class LevelBase implements GestureListener {
     private void DrawProgressCircle(float progress) {
         ClearScreen();
         //Circle position and size
-        float x = engine.ScreenWidth() / 2;
-        float y = engine.ScreenHeight() / 2;
+        float x = engine.ScreenWidth() / 2; //we dont use viewport here bcs it is not initialized yet
+        float y = engine.ScreenHeight() / 2;//and shaperenderer is independent of camera
         float r = 30;
         //Draw backGround circle
         shapeRenderer.setColor(Color.GRAY);

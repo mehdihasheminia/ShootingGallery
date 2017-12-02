@@ -6,12 +6,16 @@ import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.scenes.scene2d.utils.Drawable;
 import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
 import com.bornaapp.borna2d.game.levels.Engine;
+import com.bornaapp.borna2d.game.levels.LevelBase;
+
+import javax.sound.sampled.LineEvent;
 
 /**
  * Created by Mehdi on 12/6/2016.
  */
 public class LifeCounter {
 
+    LevelBase currentLevel = Engine.getInstance().getCurrentLevel();
     Table table = new Table();
     Image image;
 
@@ -20,21 +24,21 @@ public class LifeCounter {
 
     public void Init() {
 
-        //------------------------ Image -----------------------------------
-        image = new Image(new TextureRegion(Engine.getInstance().getCurrentLevel().assets.getTexture("LifeBar.png")));
+        //------------------------ Image ---------------------------------------
+        image = new Image(new TextureRegion(currentLevel.assets.getTexture("LifeBar.png")));
 
         //---------------------------Layout Table ------------------------------
-        Engine.getInstance().getCurrentLevel().baseUIStage.addActor(table);
+        currentLevel.baseUIStage.addActor(table);
 
-        final Drawable tblBackground = new TextureRegionDrawable(new TextureRegion(Engine.getInstance().getCurrentLevel().assets.getTexture("LifeBox.png")));
+        final Drawable tblBackground = new TextureRegionDrawable(new TextureRegion(currentLevel.assets.getTexture("LifeBox.png")));
         table.setBackground(tblBackground);
 
         table.setWidth(120);
         table.setHeight(28);
         table.setTransform(true);
         float margin = 10f;
-        float x = Engine.getInstance().ScreenWidth() - table.getWidth() - margin;
-        float y = Engine.getInstance().ScreenHeight() - table.getHeight() - margin;
+        float x = currentLevel.getCamera().viewportWidth - table.getWidth() - margin;
+        float y = currentLevel.getCamera().viewportHeight - table.getHeight() - margin;
         table.setPosition((x > 0 ? x : 0), (y > 0 ? y : 0));
 
         table.left();

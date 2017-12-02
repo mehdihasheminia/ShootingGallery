@@ -8,16 +8,19 @@ import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.scenes.scene2d.utils.Drawable;
 import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
 import com.bornaapp.borna2d.game.levels.Engine;
+import com.bornaapp.borna2d.game.levels.LevelBase;
 
 /**
  * Created by Hashemi on 12/6/2016.
  */
 public class CoinCounter {
 
+    LevelBase currentLevel = Engine.getInstance().getCurrentLevel();
     Table table = new Table();
     Label label;
 
-    public float margin = 10f;
+    public float marginX = 10f;
+    public float marginY = 10f;
 
     public CoinCounter() {
     }
@@ -32,16 +35,16 @@ public class CoinCounter {
         label = new Label("0",style);
 
         //---------------------------Layout Table ------------------------------
-        Engine.getInstance().getCurrentLevel().baseUIStage.addActor(table);
+        currentLevel.baseUIStage.addActor(table);
 
-        final Drawable tblBackground = new TextureRegionDrawable(new TextureRegion(Engine.getInstance().getCurrentLevel().assets.getTexture("coinBox.png")));
+        final Drawable tblBackground = new TextureRegionDrawable(new TextureRegion(currentLevel.assets.getTexture("coinBox.png")));
         table.setBackground(tblBackground);
 
         table.setWidth(100);
         table.setHeight(36);
         table.setTransform(true);
-        float x = margin;
-        float y = Engine.getInstance().ScreenHeight() - table.getHeight() - margin;
+        float x = marginX;
+        float y = currentLevel.getCamera().viewportHeight - table.getHeight() - marginY;
         table.setPosition((x > 0 ? x : 0), (y > 0 ? y : 0));
 
         table.add(label).padBottom(3);

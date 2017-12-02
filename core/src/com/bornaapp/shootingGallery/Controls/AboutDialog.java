@@ -30,7 +30,7 @@ public class AboutDialog {
 
         //------------------------------- OK Button -----------------------------------
         Skin okBtnSkin = new Skin();
-        okBtnSkin.addRegions(Engine.getInstance().getCurrentLevel().assets.getTextureAtlas("okBtn.atlas"));
+        okBtnSkin.addRegions(currentLevel.assets.getTextureAtlas("okBtn.atlas"));
 
         ImageButton okBtn = new ImageButton(okBtnSkin.getDrawable("0ok_normal"), okBtnSkin.getDrawable("1ok_clicked"));
 
@@ -46,14 +46,14 @@ public class AboutDialog {
         currentLevel.dialogUIStage.addActor(table);
         table.setZIndex(100);
 
-        final Drawable tblBackground = new TextureRegionDrawable(new TextureRegion(Engine.getInstance().getCurrentLevel().assets.getTexture("aboutTable.png")));
+        final Drawable tblBackground = new TextureRegionDrawable(new TextureRegion(currentLevel.assets.getTexture("aboutTable.png")));
         table.setBackground(tblBackground);
 
         table.setWidth(400);
         table.setHeight(322);
         table.setTransform(true);
-        float x = (Engine.getInstance().ScreenWidth() - table.getWidth()) / 2;
-        float y = (Engine.getInstance().ScreenHeight() - table.getHeight()) / 2;
+        float x = (currentLevel.getCamera().viewportWidth - table.getWidth()) / 2;
+        float y = (currentLevel.getCamera().viewportHeight - table.getHeight()) / 2;
         table.setPosition((x > 0 ? x : 0), (y > 0 ? y : 0));
 
         //Adding buttons to Table
